@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Οικονομικά Σπιτιού 2025</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: white; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .counter-badge { position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px; z-index: 9999; pointer-events: none; }
+        
+        /* Απόκρυψη scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+</head>
+<body>
+
+<div class="mobile-container flex flex-col">
+    
+    <div class="bg-blue-600 text-white p-4 shadow-md z-10 sticky top-0">
+        <div class="flex justify-between items-center">
+            <h1 class="text-lg font-bold"><i class="fas fa-wallet mr-2"></i> Budget 2025</h1>
+            <button id="logoutBtn" class="hidden text-sm bg-blue-700 px-3 py-1 rounded hover:bg-blue-800">Έξοδος</button>
+        </div>
+    </div>
+
+    <div id="mainContent" class="flex-grow p-4 relative">
+        
+        <div id="loginView" class="flex flex-col justify-center items-center h-[80vh]">
+            <div class="bg-white p-6 rounded-lg shadow-sm w-full">
+                <h2 class="text-xl font-bold mb-4 text-center text-gray-700">Είσοδος</h2>
+                <input type="email" id="emailInput" placeholder="Email" class="w-full p-3 mb-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                <input type="password" id="passInput" placeholder="Κωδικός" class="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition">Σύνδεση</button>
+                <p id="loginMsg" class="text-red-500 text-sm mt-3 text-center"></p>
+                <p class="text-xs text-gray-400 mt-4 text-center">Αν δεν έχεις λογαριασμό, βάλε τα στοιχεία σου και θα δημιουργηθεί αυτόματα.</p>
+            </div>
+        </div>
+
+        <div id="dashboardView" class="hidden space-y-4">
+            
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-lg">
+                <p class="text-sm opacity-80">Διαθέσιμο Υπόλοιπο (Εκτίμηση)</p>
+                <h2 class="text-3xl font-bold mt-1">€ <span id="balanceDisplay">0,00</span></h2>
+                <div class="mt-4 flex gap-2">
+                    <span class="bg-white/20 px-2 py-1 rounded text-xs">Έσοδα: +0€</span>
+                    <span class="bg-white/20 px-2 py-1 rounded text-xs">Έξοδα: -0€</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="alert('Λειτουργία υπό κατασκευή')" class="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center hover:bg-gray-50 border border-gray-100">
+                    <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-2">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-600">Έσοδο</span>
+                </button>
+                <button onclick="alert('Λειτουργία υπό κατασκευή')" class="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center hover:bg-gray-50 border border-gray-100">
+                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-2">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-600">Έξοδο</span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-700">Τρέχουσες Δόσεις</h3>
+                    <button class="text-blue-500 text-sm">Προβολή όλων</button>
+                </div>
+                <div id="installmentsList" class="space-y-3">
+                    <div class="text-gray-400 text-sm text-center py-4">Δεν υπάρχουν δόσεις ακόμα.</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="bottomNav" class="hidden bg-white border-t border-gray-200 sticky bottom-0 z-20 pb-safe">
+        <div class="flex justify-around items-center h-16">
+            <button class="flex flex-col items-center text-blue-600 focus:outline-none">
+                <i class="fas fa-home text-xl mb-1"></i>
+                <span class="text-[10px]">Αρχική</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-blue-500 focus:outline-none">
+                <i class="fas fa-list text-xl mb-1"></i>
+                <span class="text-[10px]">Κινήσεις</span>
+            </button>
+            <div class="relative -top-5">
+                <button class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105">
+                    <i class="fas fa-plus text-xl"></i>
+                </button>
+            </div>
+            <button class="flex flex-col items-center text-gray-400 hover:text-blue-500 focus:outline-none">
+                <i class="fas fa-chart-pie text-xl mb-1"></i>
+                <span class="text-[10px]">Ανάλυση</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-blue-500 focus:outline-none">
+                <i class="fas fa-cog text-xl mb-1"></i>
+                <span class="text-[10px]">Ρυθμίσεις</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="counter" class="counter-badge">Visits: <span id="visitCount">0</span></div>
+</div>
+
+<script>
+    // --- ΡΥΘΜΙΣΕΙΣ FIREBASE (Τα δικά σου κλειδιά) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDV6btFSq5IeQlVq7YihlJOkaKam-MrsJQ",
+      authDomain: "home-budget-gr.firebaseapp.com",
+      projectId: "home-budget-gr",
+      storageBucket: "home-budget-gr.firebasestorage.app",
+      messagingSenderId: "530104677253",
+      appId: "1:530104677253:web:3e166ea9ec706f60384aec",
+      measurementId: "G-BLBX2JZR15"
+    };
+
+    // Initialize Firebase
+    try {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized success");
+    } catch (e) {
+        console.error("Firebase init error: ", e);
+        document.getElementById('loginMsg').innerText = "Σφάλμα Config: " + e.message;
+    }
+
+    // UI Variables
+    const loginView = document.getElementById('loginView');
+    const dashboardView = document.getElementById('dashboardView');
+    const bottomNav = document.getElementById('bottomNav');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const emailInput = document.getElementById('emailInput');
+    const passInput = document.getElementById('passInput');
+    const loginMsg = document.getElementById('loginMsg');
+
+    // Έλεγχος Κατάστασης Χρήστη (Logged in / Logged out)
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            console.log("User is logged in:", user.email);
+            showApp();
+        } else {
+            console.log("No user");
+            showLogin();
+        }
+    });
+
+    function showLogin() {
+        loginView.classList.remove('hidden');
+        dashboardView.classList.add('hidden');
+        bottomNav.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        loginMsg.innerText = "";
+    }
+
+    function showApp() {
+        loginView.classList.add('hidden');
+        dashboardView.classList.remove('hidden');
+        bottomNav.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+        updateCounter(); 
+    }
+
+    // Login Logic
+    function handleLogin() {
+        const email = emailInput.value;
+        const pass = passInput.value;
+
+        if (!email || !pass) {
+            loginMsg.innerText = "Βάλε Email και Κωδικό";
+            return;
+        }
+
+        loginMsg.innerText = "Γίνεται σύνδεση...";
+
+        firebase.auth().signInWithEmailAndPassword(email, pass)
+            .catch((error) => {
+                // Αν δεν βρεθεί χρήστης, ρωτάμε για εγγραφή
+                if (error.code === 'auth/user-not-found') {
+                    if(confirm("Δεν υπάρχει αυτός ο χρήστης. Να φτιάξω νέο λογαριασμό;")) {
+                        firebase.auth().createUserWithEmailAndPassword(email, pass)
+                        .then(() => { loginMsg.innerText = "Ο λογαριασμός φτιάχτηκε!"; })
+                        .catch((e) => { loginMsg.innerText = "Σφάλμα εγγραφής: " + e.message; });
+                    } else {
+                        loginMsg.innerText = "Λάθος στοιχεία.";
+                    }
+                } else if (error.code === 'auth/wrong-password') {
+                    loginMsg.innerText = "Λάθος κωδικός.";
+                } else {
+                    loginMsg.innerText = "Σφάλμα: " + error.message;
+                }
+            });
+    }
+
+    // Logout Logic
+    logoutBtn.addEventListener('click', () => {
+        firebase.auth().signOut();
+    });
+
+    // Counter Logic
+    function updateCounter() {
+        let count = localStorage.getItem('pageVisits') || 0;
+        count++;
+        localStorage.setItem('pageVisits', count);
+        document.getElementById('visitCount').innerText = count;
+    }
+    let count = localStorage.getItem('pageVisits') || 0;
+    document.getElementById('visitCount').innerText = count;
+
+</script>
+
+</body>
+</html>
