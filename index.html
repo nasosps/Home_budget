@@ -44,7 +44,7 @@
         <div class="flex justify-between items-center p-4 bg-slate-900 text-white rounded-b-2xl">
             <h1 class="text-lg font-bold tracking-tight"><i class="fas fa-wallet mr-2 text-blue-400"></i> Οικονομικά</h1>
             <div class="flex gap-2">
-                <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v8.0</span>
+                <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v9.0</span>
                 <button id="logoutBtn" class="hidden text-xs bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-600">Έξοδος</button>
             </div>
         </div>
@@ -75,11 +75,7 @@
         </div>
 
         <div id="tab-cards" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="runBulkImport()" class="bg-blue-50 text-blue-700 py-3 rounded-xl font-bold text-xs border border-blue-100 hover:bg-blue-100 transition"><i class="fas fa-sync-alt mr-1"></i> Επαναφορά (Fix)</button>
-                <button onclick="openScannerModal()" class="bg-indigo-50 text-indigo-700 py-3 rounded-xl font-bold text-xs border border-indigo-100 hover:bg-indigo-100 transition"><i class="fas fa-file-pdf mr-1"></i> Scan PDF</button>
-            </div>
-
+            
             <div class="flex flex-col space-y-3">
                 <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
                     <div class="flex items-center gap-3"><div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-bolt"></i></div><span class="font-bold">ENERGY</span></div>
@@ -108,7 +104,7 @@
             </div>
 
             <div>
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Λιστα (Ταξινομηση: Ληξη συντομα)</h3>
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Λιστα (Ληξη συντομα)</h3>
                 <div id="installmentsList" class="space-y-3 pb-20"></div>
             </div>
         </div>
@@ -181,14 +177,6 @@
                 <div><label class="text-xs font-bold text-slate-400 uppercase ml-1">Ημερομηνια Εναρξης</label><input type="date" id="inpDate" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 font-medium text-slate-700"></div>
                 <button onclick="saveInstallment()" id="saveBtn" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-bold mt-2 shadow-xl">Αποθήκευση</button>
             </div>
-        </div>
-    </div>
-
-    <div id="scannerModal" class="modal fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white w-11/12 max-w-lg rounded-3xl p-6 shadow-2xl h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center mb-4"><h3 class="text-lg font-bold text-indigo-900">Σάρωση PDF</h3><button onclick="closeScannerModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times"></i></button></div>
-            <textarea id="pasteArea" class="w-full flex-grow p-4 border-2 border-gray-200 rounded-xl bg-gray-50 text-xs font-mono mb-4" placeholder="Κάνε επικόλληση εδώ..."></textarea>
-            <div class="flex gap-2"><select id="scanBank" class="p-3 border-2 border-gray-200 rounded-xl font-bold text-sm bg-white"><option value="energy">Energy</option><option value="alpha">Alpha</option><option value="pancreta">Παγκρήτια</option></select><button onclick="processPastedText()" class="flex-grow bg-indigo-600 text-white p-3 rounded-xl font-bold shadow-lg">Ανάλυση</button></div>
         </div>
     </div>
 </div>
@@ -264,17 +252,12 @@
     function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('emailInput').value, document.getElementById('passInput').value).catch(e => document.getElementById('loginMsg').innerText = "Λάθος στοιχεία"); }
     
     // --- INSTALLMENTS LOGIC ---
-    // IMPORT DATA (Kept for reset functionality)
-    const IMPORT_DATA = [{title: "PITSOULAKIS (Energy)", totalAmount: 830.40, totalMonths: 24, startDate: "2024-11-01", monthlyPayment: 34.60, bank: "energy"},{title: "KOTSOVOLOS", totalAmount: 427.44, totalMonths: 12, startDate: "2025-12-01", monthlyPayment: 35.62, bank: "energy"},{title: "SKROUTZ (Energy)", totalAmount: 193.44, totalMonths: 12, startDate: "2025-12-01", monthlyPayment: 16.12, bank: "energy"},{title: "EVIKOON", totalAmount: 950.00, totalMonths: 24, startDate: "2025-02-01", monthlyPayment: 39.58, bank: "energy"},{title: "COSMOTE INSURANCE (Energy)", totalAmount: 148.68, totalMonths: 6, startDate: "2025-09-01", monthlyPayment: 24.78, bank: "energy"},{title: "DANDALIS TEAM", totalAmount: 250.00, totalMonths: 6, startDate: "2025-11-01", monthlyPayment: 41.66, bank: "energy"},{title: "DEI BILL PAYME", totalAmount: 401.00, totalMonths: 6, startDate: "2025-11-01", monthlyPayment: 66.83, bank: "energy"},{title: "KLARNA (3D Store)", totalAmount: 220.68, totalMonths: 3, startDate: "2026-01-01", monthlyPayment: 73.56, bank: "alpha"}, {title: "COSMOTE INSURANCE (Alpha)", totalAmount: 252.24, totalMonths: 12, startDate: "2025-04-01", monthlyPayment: 21.02, bank: "alpha"},{title: "PITSOULAKIS (Alpha)", totalAmount: 799.00, totalMonths: 12, startDate: "2025-08-01", monthlyPayment: 66.58, bank: "alpha"},{title: "ΠΑΓΚΡΗΤΙΑ ΔΑΝΕΙΟ", totalAmount: 888.0, totalMonths: 24, startDate: "2025-08-01", monthlyPayment: 37.0, bank: "pancreta"}];
-    function runBulkImport() { if(currentUser && confirm("Διαγραφή παλιών και επαναφορά;")) db.collection('users').doc(currentUser.uid).collection('installments').get().then(snap => Promise.all(snap.docs.map(d => d.ref.delete()))).then(() => { const batch = IMPORT_DATA.map(i => { i.createdAt = firebase.firestore.FieldValue.serverTimestamp(); return db.collection('users').doc(currentUser.uid).collection('installments').add(i); }); batch.push(db.collection('users').doc(currentUser.uid).set({budgetList: cashFlowData}, {merge: true})); return Promise.all(batch); }).then(() => location.reload()); }
-
     function loadInstallments() {
         db.collection('users').doc(currentUser.uid).collection('installments').onSnapshot((snapshot) => {
             const list = document.getElementById('installmentsList');
             let sumE=0, sumA=0, sumP=0, sumAll=0;
-            let nextSumE=0, nextSumA=0, nextSumP=0; // Next Month Sums
+            let nextSumE=0, nextSumA=0, nextSumP=0; 
             
-            // 1. Process and Sort Data in Memory (Client-side Sort)
             let items = [];
             snapshot.forEach(doc => {
                 const d = doc.data();
@@ -282,7 +265,7 @@
                 const endDate = new Date(start); 
                 endDate.setMonth(start.getMonth() + d.totalMonths);
                 d.id = doc.id;
-                d.endDateObj = endDate; // Store object for sorting
+                d.endDateObj = endDate; 
                 items.push(d);
             });
 
@@ -291,7 +274,6 @@
 
             list.innerHTML = "";
 
-            // 2. Render Loop
             items.forEach(d => {
                 const start = new Date(d.startDate); const now = new Date(); 
                 let currentInst = ((now.getFullYear() - start.getFullYear()) * 12) + (now.getMonth() - start.getMonth()) + 1;
@@ -299,17 +281,14 @@
                 if(currentInst > d.totalMonths) return; 
                 if(currentInst < 1) currentInst = 0; 
                 
-                // Current Month Totals
                 sumAll += d.monthlyPayment;
                 if(d.bank==='energy') sumE+=d.monthlyPayment; else if(d.bank==='alpha') sumA+=d.monthlyPayment; else sumP+=d.monthlyPayment;
 
-                // Next Month Totals
                 let nextInst = currentInst + 1;
                 if(nextInst <= d.totalMonths && nextInst > 0) {
                     if(d.bank==='energy') nextSumE+=d.monthlyPayment; else if(d.bank==='alpha') nextSumA+=d.monthlyPayment; else nextSumP+=d.monthlyPayment;
                 }
 
-                // Render Item
                 const endStr = d.endDateObj.toLocaleDateString('el-GR', {month:'long', year:'numeric'});
                 let color = d.bank==='energy' ? 'orange' : (d.bank==='alpha' ? 'red' : 'blue');
                 let badge = d.bank==='energy' ? 'Energy' : (d.bank==='alpha' ? 'Alpha' : 'PAGKR');
@@ -330,7 +309,6 @@
                 `);
             });
 
-            // Update UI Totals (Current & Next)
             document.getElementById('sumEnergy').innerText = sumE.toFixed(2); document.getElementById('nextSumEnergy').innerText = nextSumE.toFixed(2);
             document.getElementById('sumAlpha').innerText = sumA.toFixed(2); document.getElementById('nextSumAlpha').innerText = nextSumA.toFixed(2);
             document.getElementById('sumPancreta').innerText = sumP.toFixed(2); document.getElementById('nextSumPancreta').innerText = nextSumP.toFixed(2);
@@ -338,14 +316,11 @@
         });
     }
 
-    // --- MODAL & SCANNER ---
+    // --- MODAL ---
     function editInstallment(id, t, tot, m, s, b) { document.getElementById('editId').value = id; document.getElementById('modalTitle').innerText = "Επεξεργασία"; document.getElementById('inpTitle').value = t; document.getElementById('inpAmount').value = tot; document.getElementById('inpMonths').value = m; document.getElementById('inpDate').value = s; document.querySelectorAll(`input[value="${b}"]`)[0].checked = true; openModal(); }
     function saveInstallment() { const id=document.getElementById('editId').value; const t=document.getElementById('inpTitle').value; const tot=parseFloat(document.getElementById('inpAmount').value); const m=parseInt(document.getElementById('inpMonths').value); const s=document.getElementById('inpDate').value; const b=document.querySelector('input[name="bankType"]:checked').value; if(!t||!tot||!m||!s) return alert("Λείπουν στοιχεία"); const d = {title:t, totalAmount:tot, totalMonths:m, startDate:s, bank:b, monthlyPayment:tot/m}; (id ? db.collection('users').doc(currentUser.uid).collection('installments').doc(id).update(d) : db.collection('users').doc(currentUser.uid).collection('installments').add({...d, createdAt: firebase.firestore.FieldValue.serverTimestamp()})).then(()=>closeModal()); }
     function openModal(){ document.getElementById('addModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('addModal').classList.add('active'),10); if(!document.getElementById('inpDate').value) document.getElementById('inpDate').valueAsDate=new Date(); }
     function closeModal(){ document.getElementById('addModal').classList.remove('active'); setTimeout(()=>{document.getElementById('addModal').classList.add('hidden'); document.getElementById('editId').value=""; document.getElementById('modalTitle').innerText="Νέα Δόση"; document.getElementById('inpTitle').value=""; document.getElementById('inpAmount').value="";},200); }
-    function openScannerModal() { document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('pasteArea').value=''; }
-    function closeScannerModal() { document.getElementById('scannerModal').classList.add('hidden'); }
-    function processPastedText() { const text = document.getElementById('pasteArea').value; const bank = document.getElementById('scanBank').value; const instRegex = /(?:DOSH|ΔΟΣΗ|DOSEIS)\s*(\d{1,2})\s*[\/]\s*(\d{1,2})/i; const lines = text.split('\n'); const found = []; let stmtDate = new Date(); const dateMatch = text.match(/(\d{2})\/(\d{2})\/(20\d{2})/); if(dateMatch) stmtDate = new Date(`${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`); lines.forEach(line => { const iMatch = line.match(instRegex); const aMatch = line.match(/(\d+[.,]\d{2})/); if (iMatch && aMatch) { const cur = parseInt(iMatch[1]); const tot = parseInt(iMatch[2]); let amtStr = aMatch[0].replace('.','').replace(',','.'); if(aMatch[0].includes(',')&&aMatch[0].includes('.')) amtStr = aMatch[0].replace('.','').replace(',','.'); else if(aMatch[0].includes(',')) amtStr = aMatch[0].replace(',','.'); const m = Math.abs(parseFloat(amtStr)); let t = line.replace(instRegex, '').replace(aMatch[0], '').replace(/\d{2}\/\d{2}\/\d{4}/, '').trim().substring(0,30); const s = new Date(stmtDate); s.setMonth(s.getMonth() - (cur - 1)); found.push({title:t, totalAmount:m*tot, totalMonths:tot, startDate:s.toISOString().split('T')[0], monthlyPayment:m, bank:bank, createdAt: firebase.firestore.FieldValue.serverTimestamp()}); } }); if(found.length && confirm(`Βρέθηκαν ${found.length}. Εισαγωγή;`)) Promise.all(found.map(i => db.collection('users').doc(currentUser.uid).collection('installments').add(i))).then(()=>{ alert("ΟΚ!"); closeScannerModal(); }); }
 </script>
 </body>
 </html>
