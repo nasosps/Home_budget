@@ -45,7 +45,6 @@
         <div class="flex justify-between items-center p-4 bg-slate-900 text-white rounded-b-2xl">
             <h1 class="text-lg font-bold tracking-tight"><i class="fas fa-wallet mr-2 text-blue-400"></i> Οικονομικά</h1>
             <div class="flex gap-2">
-                <span id="visitCount" class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v7.0</span>
                 <button id="logoutBtn" class="hidden text-xs bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-600">Έξοδος</button>
             </div>
         </div>
@@ -76,11 +75,6 @@
         </div>
 
         <div id="tab-cards" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="runBulkImport()" class="bg-blue-50 text-blue-700 py-3 rounded-xl font-bold text-xs border border-blue-100 hover:bg-blue-100 transition"><i class="fas fa-sync-alt mr-1"></i> Επαναφορά (Fix)</button>
-                <button onclick="openScannerModal()" class="bg-indigo-50 text-indigo-700 py-3 rounded-xl font-bold text-xs border border-indigo-100 hover:bg-indigo-100 transition"><i class="fas fa-file-pdf mr-1"></i> Scan PDF</button>
-            </div>
-
             <div class="flex flex-col space-y-3">
                 <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
                     <div class="flex items-center gap-3"><div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-bolt"></i></div><span class="font-bold">ENERGY</span></div>
@@ -103,31 +97,30 @@
         </div>
 
         <div id="tab-cashflow" class="tab-content hidden space-y-6">
-            <div class="bg-green-50 p-5 rounded-3xl border border-green-100">
-                <h3 class="text-green-800 font-bold mb-4 flex items-center"><i class="fas fa-arrow-down mr-2"></i> Έσοδα Μηνός</h3>
-                <div class="space-y-3">
-                    <div><label class="text-xs text-green-700 font-bold ml-1">Μισθός Νάσου</label><input type="number" id="incNasos" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-green-200 font-bold text-slate-700 focus:outline-none focus:border-green-500"></div>
-                    <div><label class="text-xs text-green-700 font-bold ml-1">Μισθός Ελπίδας</label><input type="number" id="incElpida" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-green-200 font-bold text-slate-700 focus:outline-none focus:border-green-500"></div>
+            
+            <div class="bg-green-50 p-5 rounded-3xl border border-green-100 relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-green-800 font-bold flex items-center"><i class="fas fa-arrow-down mr-2"></i> Έσοδα</h3>
+                    <button onclick="addCashFlowItem('income')" class="w-8 h-8 bg-white rounded-full text-green-600 shadow-sm flex items-center justify-center hover:bg-green-100 transition"><i class="fas fa-plus text-xs"></i></button>
                 </div>
+                <div id="incomeList" class="space-y-2"></div>
                 <div class="mt-4 pt-3 border-t border-green-200 flex justify-between items-center">
-                    <span class="text-sm font-bold text-green-900">Σύνολο Εσόδων:</span>
+                    <span class="text-xs font-bold text-green-900 uppercase">Συνολο Εσοδων</span>
                     <span class="text-xl font-bold text-green-700" id="totalIncomeDisplay">0€</span>
                 </div>
             </div>
 
-            <div class="bg-red-50 p-5 rounded-3xl border border-red-100">
-                <h3 class="text-red-800 font-bold mb-4 flex items-center"><i class="fas fa-arrow-up mr-2"></i> Πάγια Έξοδα (Μετρητά)</h3>
-                <div class="space-y-3">
-                    <div><label class="text-xs text-red-700 font-bold ml-1">Δάνειο Αυτοκινήτου (έως 9/28)</label><input type="number" id="expCar" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-red-200 font-bold text-slate-700 focus:outline-none focus:border-red-500"></div>
-                    <div><label class="text-xs text-red-700 font-bold ml-1">Super Market</label><input type="number" id="expSM" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-red-200 font-bold text-slate-700 focus:outline-none focus:border-red-500"></div>
-                    <div><label class="text-xs text-red-700 font-bold ml-1">Ρεύμα</label><input type="number" id="expElec" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-red-200 font-bold text-slate-700 focus:outline-none focus:border-red-500"></div>
-                    <div><label class="text-xs text-red-700 font-bold ml-1">Καύσιμα</label><input type="number" id="expFuel" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-red-200 font-bold text-slate-700 focus:outline-none focus:border-red-500"></div>
-                    <div><label class="text-xs text-red-700 font-bold ml-1">Ψυχοθεραπείες</label><input type="number" id="expPsycho" onchange="saveCashFlow()" class="w-full p-3 rounded-xl border border-red-200 font-bold text-slate-700 focus:outline-none focus:border-red-500"></div>
+            <div class="bg-red-50 p-5 rounded-3xl border border-red-100 relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-red-800 font-bold flex items-center"><i class="fas fa-arrow-up mr-2"></i> Πάγια Έξοδα</h3>
+                    <button onclick="addCashFlowItem('expenses')" class="w-8 h-8 bg-white rounded-full text-red-600 shadow-sm flex items-center justify-center hover:bg-red-100 transition"><i class="fas fa-plus text-xs"></i></button>
                 </div>
+                <div id="expensesList" class="space-y-2"></div>
                 <div class="mt-4 pt-3 border-t border-red-200 flex justify-between items-center">
-                    <span class="text-sm font-bold text-red-900">Σύνολο Παγίων:</span>
+                    <span class="text-xs font-bold text-red-900 uppercase">Συνολο Παγιων</span>
                     <span class="text-xl font-bold text-red-700" id="totalFixedDisplay">0€</span>
                 </div>
+                <p class="text-[10px] text-red-400 mt-2 text-center">* Εδώ βάζεις μόνο τα έξοδα μετρητών (όχι κάρτες).</p>
             </div>
         </div>
 
@@ -188,14 +181,6 @@
             </div>
         </div>
     </div>
-
-    <div id="scannerModal" class="modal fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white w-11/12 max-w-lg rounded-3xl p-6 shadow-2xl h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center mb-4"><h3 class="text-lg font-bold text-indigo-900">Σάρωση PDF</h3><button onclick="closeScannerModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times"></i></button></div>
-            <textarea id="pasteArea" class="w-full flex-grow p-4 border-2 border-gray-200 rounded-xl bg-gray-50 text-xs font-mono mb-4" placeholder="Κάνε επικόλληση εδώ..."></textarea>
-            <div class="flex gap-2"><select id="scanBank" class="p-3 border-2 border-gray-200 rounded-xl font-bold text-sm bg-white"><option value="energy">Energy</option><option value="alpha">Alpha</option><option value="pancreta">Παγκρήτια</option></select><button onclick="processPastedText()" class="flex-grow bg-indigo-600 text-white p-3 rounded-xl font-bold shadow-lg">Ανάλυση</button></div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -206,8 +191,20 @@
     let currentUser = null;
     let globalMonthlyInstallments = 0;
     
-    // Default Cash Flow Values
-    let cashFlowData = { incNasos: 1400, incElpida: 410, expCar: 250, expSM: 400, expElec: 170, expFuel: 150, expPsycho: 180 };
+    // Default Data with Structure for Lists
+    let cashFlowData = {
+        income: [
+            {id: 1, title: 'Μισθός Νάσου', amount: 1400},
+            {id: 2, title: 'Μισθός Ελπίδας', amount: 410}
+        ],
+        expenses: [
+            {id: 1, title: 'Δάνειο Αυτοκινήτου', amount: 250},
+            {id: 2, title: 'Super Market', amount: 400},
+            {id: 3, title: 'Ρεύμα', amount: 170},
+            {id: 4, title: 'Καύσιμα', amount: 150},
+            {id: 5, title: 'Ψυχοθεραπείες', amount: 180}
+        ]
+    };
 
     // --- NAVIGATION ---
     function switchTab(tabName) {
@@ -219,77 +216,84 @@
         if(tabName === 'summary') updateSummaryView();
     }
 
-    // --- IMPORT DATA ---
-    const IMPORT_DATA = [
-        {title: "PITSOULAKIS (Energy)", totalAmount: 830.40, totalMonths: 24, startDate: "2024-11-01", monthlyPayment: 34.60, bank: "energy"},
-        {title: "KOTSOVOLOS", totalAmount: 427.44, totalMonths: 12, startDate: "2025-12-01", monthlyPayment: 35.62, bank: "energy"},
-        {title: "SKROUTZ (Energy)", totalAmount: 193.44, totalMonths: 12, startDate: "2025-12-01", monthlyPayment: 16.12, bank: "energy"},
-        {title: "EVIKOON", totalAmount: 950.00, totalMonths: 24, startDate: "2025-02-01", monthlyPayment: 39.58, bank: "energy"},
-        {title: "COSMOTE INSURANCE (Energy)", totalAmount: 148.68, totalMonths: 6, startDate: "2025-09-01", monthlyPayment: 24.78, bank: "energy"},
-        {title: "DANDALIS TEAM", totalAmount: 250.00, totalMonths: 6, startDate: "2025-11-01", monthlyPayment: 41.66, bank: "energy"},
-        {title: "DEI BILL PAYME", totalAmount: 401.00, totalMonths: 6, startDate: "2025-11-01", monthlyPayment: 66.83, bank: "energy"},
-        {title: "KLARNA (3D Store)", totalAmount: 220.68, totalMonths: 3, startDate: "2026-01-01", monthlyPayment: 73.56, bank: "alpha"}, 
-        {title: "COSMOTE INSURANCE (Alpha)", totalAmount: 252.24, totalMonths: 12, startDate: "2025-04-01", monthlyPayment: 21.02, bank: "alpha"},
-        {title: "PITSOULAKIS (Alpha)", totalAmount: 799.00, totalMonths: 12, startDate: "2025-08-01", monthlyPayment: 66.58, bank: "alpha"},
-        {title: "ΠΑΓΚΡΗΤΙΑ ΔΑΝΕΙΟ", totalAmount: 888.0, totalMonths: 24, startDate: "2025-08-01", monthlyPayment: 37.0, bank: "pancreta"}
-    ];
-
-    function runBulkImport() {
-        if(!currentUser || !confirm("Διαγραφή παλιών και εισαγωγή των διορθωμένων δόσεων;")) return;
-        db.collection('users').doc(currentUser.uid).collection('installments').get().then(snap => Promise.all(snap.docs.map(d => d.ref.delete())))
-        .then(() => {
-            const batch = IMPORT_DATA.map(i => { i.createdAt = firebase.firestore.FieldValue.serverTimestamp(); return db.collection('users').doc(currentUser.uid).collection('installments').add(i); });
-            // Save initial cash flow budget
-            batch.push(db.collection('users').doc(currentUser.uid).set({budget: cashFlowData}, {merge: true}));
-            return Promise.all(batch);
-        }).then(() => { location.reload(); });
-    }
-
-    // --- CASH FLOW LOGIC ---
+    // --- CASH FLOW LOGIC (Dynamic) ---
     function loadCashFlow() {
         db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
-            if(doc.exists && doc.data().budget) {
-                cashFlowData = doc.data().budget;
-                // Populate Inputs
-                document.getElementById('incNasos').value = cashFlowData.incNasos;
-                document.getElementById('incElpida').value = cashFlowData.incElpida;
-                document.getElementById('expCar').value = cashFlowData.expCar;
-                document.getElementById('expSM').value = cashFlowData.expSM;
-                document.getElementById('expElec').value = cashFlowData.expElec;
-                document.getElementById('expFuel').value = cashFlowData.expFuel;
-                document.getElementById('expPsycho').value = cashFlowData.expPsycho;
-                updateCashFlowTotals();
+            if(doc.exists && doc.data().budgetList) {
+                cashFlowData = doc.data().budgetList;
+                renderCashFlow();
             } else {
-                // Initialize if empty
+                // First time: Save default structure
                 saveCashFlow();
+                renderCashFlow();
             }
         });
     }
 
     function saveCashFlow() {
-        cashFlowData = {
-            incNasos: parseFloat(document.getElementById('incNasos').value) || 0,
-            incElpida: parseFloat(document.getElementById('incElpida').value) || 0,
-            expCar: parseFloat(document.getElementById('expCar').value) || 0,
-            expSM: parseFloat(document.getElementById('expSM').value) || 0,
-            expElec: parseFloat(document.getElementById('expElec').value) || 0,
-            expFuel: parseFloat(document.getElementById('expFuel').value) || 0,
-            expPsycho: parseFloat(document.getElementById('expPsycho').value) || 0
-        };
-        db.collection('users').doc(currentUser.uid).set({budget: cashFlowData}, {merge: true});
+        db.collection('users').doc(currentUser.uid).set({budgetList: cashFlowData}, {merge: true});
         updateCashFlowTotals();
     }
 
+    function renderCashFlow() {
+        const incList = document.getElementById('incomeList');
+        const expList = document.getElementById('expensesList');
+        incList.innerHTML = ''; expList.innerHTML = '';
+
+        // Render Income
+        cashFlowData.income.forEach((item, index) => {
+            incList.insertAdjacentHTML('beforeend', `
+                <div class="flex gap-2 items-center">
+                    <input type="text" value="${item.title}" onchange="updateCashFlowItem('income', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-green-500" placeholder="Περιγραφή">
+                    <input type="number" value="${item.amount}" onchange="updateCashFlowItem('income', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-green-500" placeholder="€">
+                    <button onclick="deleteCashFlowItem('income', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                </div>
+            `);
+        });
+
+        // Render Expenses
+        cashFlowData.expenses.forEach((item, index) => {
+            expList.insertAdjacentHTML('beforeend', `
+                <div class="flex gap-2 items-center">
+                    <input type="text" value="${item.title}" onchange="updateCashFlowItem('expenses', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-red-500" placeholder="Περιγραφή">
+                    <input type="number" value="${item.amount}" onchange="updateCashFlowItem('expenses', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-red-500" placeholder="€">
+                    <button onclick="deleteCashFlowItem('expenses', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                </div>
+            `);
+        });
+        updateCashFlowTotals();
+    }
+
+    function addCashFlowItem(type) {
+        cashFlowData[type].push({title: '', amount: 0});
+        saveCashFlow();
+        renderCashFlow(); // Re-render to show new input
+    }
+
+    function updateCashFlowItem(type, index, field, value) {
+        if(field === 'amount') value = parseFloat(value) || 0;
+        cashFlowData[type][index][field] = value;
+        saveCashFlow();
+    }
+
+    function deleteCashFlowItem(type, index) {
+        if(confirm('Διαγραφή;')) {
+            cashFlowData[type].splice(index, 1);
+            saveCashFlow();
+            renderCashFlow();
+        }
+    }
+
     function updateCashFlowTotals() {
-        const totalInc = cashFlowData.incNasos + cashFlowData.incElpida;
-        const totalExp = cashFlowData.expCar + cashFlowData.expSM + cashFlowData.expElec + cashFlowData.expFuel + cashFlowData.expPsycho;
+        const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0);
+        const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
         document.getElementById('totalIncomeDisplay').innerText = totalInc + '€';
         document.getElementById('totalFixedDisplay').innerText = totalExp + '€';
     }
 
     function updateSummaryView() {
-        const totalInc = cashFlowData.incNasos + cashFlowData.incElpida;
-        const totalExp = cashFlowData.expCar + cashFlowData.expSM + cashFlowData.expElec + cashFlowData.expFuel + cashFlowData.expPsycho;
+        const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0);
+        const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
         
         document.getElementById('sumInc').innerText = totalInc.toLocaleString() + '€';
         document.getElementById('sumFix').innerText = totalExp.toLocaleString() + '€';
@@ -307,14 +311,8 @@
             currentUser = user;
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('navTabs').classList.remove('hidden');
-            switchTab('cards'); // Default tab
+            switchTab('cards');
             document.getElementById('logoutBtn').classList.remove('hidden');
-            
-            // Populate Inputs with Default if empty UI
-            document.getElementById('incNasos').value = cashFlowData.incNasos; document.getElementById('incElpida').value = cashFlowData.incElpida;
-            document.getElementById('expCar').value = cashFlowData.expCar; document.getElementById('expSM').value = cashFlowData.expSM;
-            document.getElementById('expElec').value = cashFlowData.expElec; document.getElementById('expFuel').value = cashFlowData.expFuel;
-            document.getElementById('expPsycho').value = cashFlowData.expPsycho;
             
             loadInstallments();
             loadCashFlow();
@@ -374,30 +372,6 @@
         });
     }
 
-    // --- SCANNER ---
-    function openScannerModal() { document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('pasteArea').value=''; }
-    function closeScannerModal() { document.getElementById('scannerModal').classList.add('hidden'); }
-    function processPastedText() {
-        const text = document.getElementById('pasteArea').value; const bank = document.getElementById('scanBank').value;
-        const instRegex = /(?:DOSH|ΔΟΣΗ|DOSEIS)\s*(\d{1,2})\s*[\/]\s*(\d{1,2})/i;
-        const lines = text.split('\n'); const found = [];
-        let stmtDate = new Date(); const dateMatch = text.match(/(\d{2})\/(\d{2})\/(20\d{2})/); if(dateMatch) stmtDate = new Date(`${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`);
-        lines.forEach(line => {
-            const iMatch = line.match(instRegex); const aMatch = line.match(/(\d+[.,]\d{2})/);
-            if (iMatch && aMatch) {
-                const cur = parseInt(iMatch[1]); const tot = parseInt(iMatch[2]);
-                let amtStr = aMatch[0].replace('.','').replace(',','.'); 
-                if(aMatch[0].includes(',')&&aMatch[0].includes('.')) amtStr = aMatch[0].replace('.','').replace(',','.');
-                else if(aMatch[0].includes(',')) amtStr = aMatch[0].replace(',','.');
-                const m = Math.abs(parseFloat(amtStr));
-                let t = line.replace(instRegex, '').replace(aMatch[0], '').replace(/\d{2}\/\d{2}\/\d{4}/, '').trim().substring(0,30);
-                const s = new Date(stmtDate); s.setMonth(s.getMonth() - (cur - 1));
-                found.push({title:t, totalAmount:m*tot, totalMonths:tot, startDate:s.toISOString().split('T')[0], monthlyPayment:m, bank:bank, createdAt: firebase.firestore.FieldValue.serverTimestamp()});
-            }
-        });
-        if(found.length && confirm(`Βρέθηκαν ${found.length}. Εισαγωγή;`)) Promise.all(found.map(i => db.collection('users').doc(currentUser.uid).collection('installments').add(i))).then(()=>{ alert("ΟΚ!"); closeScannerModal(); });
-    }
-
     // --- MODAL & EDIT ---
     function editInstallment(id, t, tot, m, s, b) {
         document.getElementById('editId').value = id; document.getElementById('modalTitle').innerText = "Επεξεργασία";
@@ -416,9 +390,6 @@
     }
     function openModal(){ document.getElementById('addModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('addModal').classList.add('active'),10); if(!document.getElementById('inpDate').value) document.getElementById('inpDate').valueAsDate=new Date(); }
     function closeModal(){ document.getElementById('addModal').classList.remove('active'); setTimeout(()=>{document.getElementById('addModal').classList.add('hidden'); document.getElementById('editId').value=""; document.getElementById('modalTitle').innerText="Νέα Δόση"; document.getElementById('inpTitle').value=""; document.getElementById('inpAmount').value="";},200); }
-    
-    // Visit Counter
-    let c = localStorage.getItem('pageVisits') || 0; c++; localStorage.setItem('pageVisits', c); document.getElementById('visitCount').innerText = 'v7.0 (#'+c+')';
 </script>
 </body>
 </html>
