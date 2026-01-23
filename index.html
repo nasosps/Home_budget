@@ -31,7 +31,6 @@
         .modal-content { transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1); }
         .modal.active .modal-content { transform: translateY(0); }
         
-        /* Tab Navigation Styles */
         .nav-btn { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; transition: all 0.2s; cursor: pointer; }
         .nav-btn.active { color: #0f172a; border-bottom-color: #0f172a; }
         .nav-icon { display: block; font-size: 18px; margin-bottom: 4px; }
@@ -45,6 +44,7 @@
         <div class="flex justify-between items-center p-4 bg-slate-900 text-white rounded-b-2xl">
             <h1 class="text-lg font-bold tracking-tight"><i class="fas fa-wallet mr-2 text-blue-400"></i> Οικονομικά</h1>
             <div class="flex gap-2">
+                <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v8.0</span>
                 <button id="logoutBtn" class="hidden text-xs bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-600">Έξοδος</button>
             </div>
         </div>
@@ -75,29 +75,45 @@
         </div>
 
         <div id="tab-cards" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="runBulkImport()" class="bg-blue-50 text-blue-700 py-3 rounded-xl font-bold text-xs border border-blue-100 hover:bg-blue-100 transition"><i class="fas fa-sync-alt mr-1"></i> Επαναφορά (Fix)</button>
+                <button onclick="openScannerModal()" class="bg-indigo-50 text-indigo-700 py-3 rounded-xl font-bold text-xs border border-indigo-100 hover:bg-indigo-100 transition"><i class="fas fa-file-pdf mr-1"></i> Scan PDF</button>
+            </div>
+
             <div class="flex flex-col space-y-3">
                 <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
                     <div class="flex items-center gap-3"><div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-bolt"></i></div><span class="font-bold">ENERGY</span></div>
-                    <div class="text-right"><span class="text-xs opacity-70 block uppercase">Δοσεις ΦΕΒ</span><span class="text-2xl font-bold">€ <span id="sumEnergy">0</span></span></div>
+                    <div class="text-right">
+                        <span class="text-xs opacity-70 block uppercase">Τωρα</span>
+                        <span class="text-2xl font-bold">€ <span id="sumEnergy">0</span></span>
+                        <p class="text-[10px] opacity-80 mt-1 font-mono">Επόμ: <span id="nextSumEnergy">0</span>€</p>
+                    </div>
                 </div>
                 <div class="bg-gradient-to-r from-red-800 to-rose-900 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
                     <div class="flex items-center gap-3"><div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-credit-card"></i></div><span class="font-bold">ALPHA</span></div>
-                    <div class="text-right"><span class="text-xs opacity-70 block uppercase">Δοσεις ΦΕΒ</span><span class="text-2xl font-bold">€ <span id="sumAlpha">0</span></span></div>
+                    <div class="text-right">
+                        <span class="text-xs opacity-70 block uppercase">Τωρα</span>
+                        <span class="text-2xl font-bold">€ <span id="sumAlpha">0</span></span>
+                        <p class="text-[10px] opacity-80 mt-1 font-mono">Επόμ: <span id="nextSumAlpha">0</span>€</p>
+                    </div>
                 </div>
                 <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
                     <div class="flex items-center gap-3"><div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-university"></i></div><span class="font-bold">ΠΑΓΚΡΗΤΙΑ</span></div>
-                    <div class="text-right"><span class="text-xs opacity-70 block uppercase">Δοσεις ΦΕΒ</span><span class="text-2xl font-bold">€ <span id="sumPancreta">0</span></span></div>
+                    <div class="text-right">
+                        <span class="text-xs opacity-70 block uppercase">Τωρα</span>
+                        <span class="text-2xl font-bold">€ <span id="sumPancreta">0</span></span>
+                        <p class="text-[10px] opacity-80 mt-1 font-mono">Επόμ: <span id="nextSumPancreta">0</span>€</p>
+                    </div>
                 </div>
             </div>
 
             <div>
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Αναλυτικες Δοσεις</h3>
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Λιστα (Ταξινομηση: Ληξη συντομα)</h3>
                 <div id="installmentsList" class="space-y-3 pb-20"></div>
             </div>
         </div>
 
         <div id="tab-cashflow" class="tab-content hidden space-y-6">
-            
             <div class="bg-green-50 p-5 rounded-3xl border border-green-100 relative">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-green-800 font-bold flex items-center"><i class="fas fa-arrow-down mr-2"></i> Έσοδα</h3>
@@ -105,7 +121,7 @@
                 </div>
                 <div id="incomeList" class="space-y-2"></div>
                 <div class="mt-4 pt-3 border-t border-green-200 flex justify-between items-center">
-                    <span class="text-xs font-bold text-green-900 uppercase">Συνολο Εσοδων</span>
+                    <span class="text-xs font-bold text-green-900 uppercase">Συνολο</span>
                     <span class="text-xl font-bold text-green-700" id="totalIncomeDisplay">0€</span>
                 </div>
             </div>
@@ -117,7 +133,7 @@
                 </div>
                 <div id="expensesList" class="space-y-2"></div>
                 <div class="mt-4 pt-3 border-t border-red-200 flex justify-between items-center">
-                    <span class="text-xs font-bold text-red-900 uppercase">Συνολο Παγιων</span>
+                    <span class="text-xs font-bold text-red-900 uppercase">Συνολο</span>
                     <span class="text-xl font-bold text-red-700" id="totalFixedDisplay">0€</span>
                 </div>
                 <p class="text-[10px] text-red-400 mt-2 text-center">* Εδώ βάζεις μόνο τα έξοδα μετρητών (όχι κάρτες).</p>
@@ -126,31 +142,17 @@
 
         <div id="tab-summary" class="tab-content hidden space-y-6 text-center pt-4">
             <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Τελικο Διαθεσιμο (Φεβρουαριος)</h2>
-            
             <div class="relative inline-block">
                 <span class="text-6xl font-black text-slate-800 tracking-tighter" id="grandTotalSummary">--</span>
                 <span class="text-2xl text-slate-400 absolute -top-2 -right-6">€</span>
             </div>
-            
             <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-4 text-left">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-bold text-slate-600">🟢 Έσοδα</span>
-                    <span class="font-bold text-slate-800" id="sumInc">0€</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-bold text-slate-600">🔴 Πάγια (Μετρητά)</span>
-                    <span class="font-bold text-red-500">- <span id="sumFix">0</span>€</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-bold text-slate-600">🟠 Δόσεις Καρτών</span>
-                    <span class="font-bold text-orange-500">- <span id="sumCards">0</span>€</span>
-                </div>
-                <div class="border-t border-slate-100 pt-3 mt-2">
-                    <p class="text-xs text-slate-400 text-center">Το ποσό αυτό είναι για καφέδες, βόλτες και αποταμίευση.</p>
-                </div>
+                <div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-600">🟢 Έσοδα</span><span class="font-bold text-slate-800" id="sumInc">0€</span></div>
+                <div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-600">🔴 Πάγια (Μετρητά)</span><span class="font-bold text-red-500">- <span id="sumFix">0</span>€</span></div>
+                <div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-600">🟠 Δόσεις Καρτών</span><span class="font-bold text-orange-500">- <span id="sumCards">0</span>€</span></div>
+                <div class="border-t border-slate-100 pt-3 mt-2"><p class="text-xs text-slate-400 text-center">Το ποσό αυτό είναι για καφέδες, βόλτες και αποταμίευση.</p></div>
             </div>
         </div>
-
     </div>
 
     <div id="fabBtn" class="fab-btn hidden" onclick="openModal()"><i class="fas fa-plus"></i></div>
@@ -181,6 +183,14 @@
             </div>
         </div>
     </div>
+
+    <div id="scannerModal" class="modal fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-11/12 max-w-lg rounded-3xl p-6 shadow-2xl h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4"><h3 class="text-lg font-bold text-indigo-900">Σάρωση PDF</h3><button onclick="closeScannerModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times"></i></button></div>
+            <textarea id="pasteArea" class="w-full flex-grow p-4 border-2 border-gray-200 rounded-xl bg-gray-50 text-xs font-mono mb-4" placeholder="Κάνε επικόλληση εδώ..."></textarea>
+            <div class="flex gap-2"><select id="scanBank" class="p-3 border-2 border-gray-200 rounded-xl font-bold text-sm bg-white"><option value="energy">Energy</option><option value="alpha">Alpha</option><option value="pancreta">Παγκρήτια</option></select><button onclick="processPastedText()" class="flex-grow bg-indigo-600 text-white p-3 rounded-xl font-bold shadow-lg">Ανάλυση</button></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -193,17 +203,8 @@
     
     // Default Data with Structure for Lists
     let cashFlowData = {
-        income: [
-            {id: 1, title: 'Μισθός Νάσου', amount: 1400},
-            {id: 2, title: 'Μισθός Ελπίδας', amount: 410}
-        ],
-        expenses: [
-            {id: 1, title: 'Δάνειο Αυτοκινήτου', amount: 250},
-            {id: 2, title: 'Super Market', amount: 400},
-            {id: 3, title: 'Ρεύμα', amount: 170},
-            {id: 4, title: 'Καύσιμα', amount: 150},
-            {id: 5, title: 'Ψυχοθεραπείες', amount: 180}
-        ]
+        income: [{id: 1, title: 'Μισθός Νάσου', amount: 1400}, {id: 2, title: 'Μισθός Ελπίδας', amount: 410}],
+        expenses: [{id: 1, title: 'Δάνειο Αυτοκινήτου', amount: 250}, {id: 2, title: 'Super Market', amount: 400}, {id: 3, title: 'Ρεύμα', amount: 170}, {id: 4, title: 'Καύσιμα', amount: 150}, {id: 5, title: 'Ψυχοθεραπείες', amount: 180}]
     };
 
     // --- NAVIGATION ---
@@ -216,140 +217,102 @@
         if(tabName === 'summary') updateSummaryView();
     }
 
-    // --- CASH FLOW LOGIC (Dynamic) ---
+    // --- CASH FLOW LOGIC ---
     function loadCashFlow() {
         db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
-            if(doc.exists && doc.data().budgetList) {
-                cashFlowData = doc.data().budgetList;
-                renderCashFlow();
-            } else {
-                // First time: Save default structure
-                saveCashFlow();
-                renderCashFlow();
-            }
+            if(doc.exists && doc.data().budgetList) { cashFlowData = doc.data().budgetList; renderCashFlow(); } 
+            else { saveCashFlow(); renderCashFlow(); }
         });
     }
-
-    function saveCashFlow() {
-        db.collection('users').doc(currentUser.uid).set({budgetList: cashFlowData}, {merge: true});
-        updateCashFlowTotals();
-    }
-
+    function saveCashFlow() { db.collection('users').doc(currentUser.uid).set({budgetList: cashFlowData}, {merge: true}); updateCashFlowTotals(); }
+    
     function renderCashFlow() {
-        const incList = document.getElementById('incomeList');
-        const expList = document.getElementById('expensesList');
+        const incList = document.getElementById('incomeList'); const expList = document.getElementById('expensesList');
         incList.innerHTML = ''; expList.innerHTML = '';
-
-        // Render Income
-        cashFlowData.income.forEach((item, index) => {
-            incList.insertAdjacentHTML('beforeend', `
-                <div class="flex gap-2 items-center">
-                    <input type="text" value="${item.title}" onchange="updateCashFlowItem('income', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-green-500" placeholder="Περιγραφή">
-                    <input type="number" value="${item.amount}" onchange="updateCashFlowItem('income', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-green-500" placeholder="€">
-                    <button onclick="deleteCashFlowItem('income', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button>
-                </div>
-            `);
-        });
-
-        // Render Expenses
-        cashFlowData.expenses.forEach((item, index) => {
-            expList.insertAdjacentHTML('beforeend', `
-                <div class="flex gap-2 items-center">
-                    <input type="text" value="${item.title}" onchange="updateCashFlowItem('expenses', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-red-500" placeholder="Περιγραφή">
-                    <input type="number" value="${item.amount}" onchange="updateCashFlowItem('expenses', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-red-500" placeholder="€">
-                    <button onclick="deleteCashFlowItem('expenses', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button>
-                </div>
-            `);
-        });
+        cashFlowData.income.forEach((item, index) => { incList.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-center"><input type="text" value="${item.title}" onchange="updateCashFlowItem('income', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-green-500"><input type="number" value="${item.amount}" onchange="updateCashFlowItem('income', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-green-500"><button onclick="deleteCashFlowItem('income', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button></div>`); });
+        cashFlowData.expenses.forEach((item, index) => { expList.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-center"><input type="text" value="${item.title}" onchange="updateCashFlowItem('expenses', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-red-500"><input type="number" value="${item.amount}" onchange="updateCashFlowItem('expenses', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-red-500"><button onclick="deleteCashFlowItem('expenses', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button></div>`); });
         updateCashFlowTotals();
     }
-
-    function addCashFlowItem(type) {
-        cashFlowData[type].push({title: '', amount: 0});
-        saveCashFlow();
-        renderCashFlow(); // Re-render to show new input
-    }
-
-    function updateCashFlowItem(type, index, field, value) {
-        if(field === 'amount') value = parseFloat(value) || 0;
-        cashFlowData[type][index][field] = value;
-        saveCashFlow();
-    }
-
-    function deleteCashFlowItem(type, index) {
-        if(confirm('Διαγραφή;')) {
-            cashFlowData[type].splice(index, 1);
-            saveCashFlow();
-            renderCashFlow();
-        }
-    }
-
+    function addCashFlowItem(type) { cashFlowData[type].push({title: '', amount: 0}); saveCashFlow(); renderCashFlow(); }
+    function updateCashFlowItem(type, index, field, value) { if(field === 'amount') value = parseFloat(value) || 0; cashFlowData[type][index][field] = value; saveCashFlow(); }
+    function deleteCashFlowItem(type, index) { if(confirm('Διαγραφή;')) { cashFlowData[type].splice(index, 1); saveCashFlow(); renderCashFlow(); } }
     function updateCashFlowTotals() {
-        const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0);
-        const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
-        document.getElementById('totalIncomeDisplay').innerText = totalInc + '€';
-        document.getElementById('totalFixedDisplay').innerText = totalExp + '€';
+        const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0); const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
+        document.getElementById('totalIncomeDisplay').innerText = totalInc + '€'; document.getElementById('totalFixedDisplay').innerText = totalExp + '€';
     }
-
     function updateSummaryView() {
-        const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0);
-        const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
-        
-        document.getElementById('sumInc').innerText = totalInc.toLocaleString() + '€';
-        document.getElementById('sumFix').innerText = totalExp.toLocaleString() + '€';
+        const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0); const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
+        document.getElementById('sumInc').innerText = totalInc.toLocaleString() + '€'; document.getElementById('sumFix').innerText = totalExp.toLocaleString() + '€';
         document.getElementById('sumCards').innerText = globalMonthlyInstallments.toFixed(0) + '€';
-        
         const grand = totalInc - totalExp - globalMonthlyInstallments;
-        const el = document.getElementById('grandTotalSummary');
-        el.innerText = grand.toLocaleString('el-GR', {maximumFractionDigits: 0});
-        el.className = `text-6xl font-black tracking-tighter ${grand < 0 ? 'text-red-500' : 'text-slate-800'}`;
+        document.getElementById('grandTotalSummary').innerText = grand.toLocaleString('el-GR', {maximumFractionDigits: 0});
+        document.getElementById('grandTotalSummary').className = `text-6xl font-black tracking-tighter ${grand < 0 ? 'text-red-500' : 'text-slate-800'}`;
     }
 
     // --- AUTH & INIT ---
     auth.onAuthStateChanged((user) => {
         if (user) {
             currentUser = user;
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('navTabs').classList.remove('hidden');
-            switchTab('cards');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-            
-            loadInstallments();
-            loadCashFlow();
+            ['loginView'].forEach(id=>document.getElementById(id).classList.add('hidden')); ['navTabs','logoutBtn'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
+            switchTab('cards'); loadInstallments(); loadCashFlow();
         } else {
             currentUser = null;
-            document.getElementById('loginView').classList.remove('hidden');
-            document.getElementById('navTabs').classList.add('hidden');
-            document.querySelectorAll('.tab-content').forEach(e=>e.classList.add('hidden'));
+            document.getElementById('loginView').classList.remove('hidden'); ['navTabs','logoutBtn'].forEach(id=>document.getElementById(id).classList.add('hidden')); document.querySelectorAll('.tab-content').forEach(e=>e.classList.add('hidden'));
         }
     });
-
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
     function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('emailInput').value, document.getElementById('passInput').value).catch(e => document.getElementById('loginMsg').innerText = "Λάθος στοιχεία"); }
     
     // --- INSTALLMENTS LOGIC ---
+    // IMPORT DATA (Kept for reset functionality)
+    const IMPORT_DATA = [{title: "PITSOULAKIS (Energy)", totalAmount: 830.40, totalMonths: 24, startDate: "2024-11-01", monthlyPayment: 34.60, bank: "energy"},{title: "KOTSOVOLOS", totalAmount: 427.44, totalMonths: 12, startDate: "2025-12-01", monthlyPayment: 35.62, bank: "energy"},{title: "SKROUTZ (Energy)", totalAmount: 193.44, totalMonths: 12, startDate: "2025-12-01", monthlyPayment: 16.12, bank: "energy"},{title: "EVIKOON", totalAmount: 950.00, totalMonths: 24, startDate: "2025-02-01", monthlyPayment: 39.58, bank: "energy"},{title: "COSMOTE INSURANCE (Energy)", totalAmount: 148.68, totalMonths: 6, startDate: "2025-09-01", monthlyPayment: 24.78, bank: "energy"},{title: "DANDALIS TEAM", totalAmount: 250.00, totalMonths: 6, startDate: "2025-11-01", monthlyPayment: 41.66, bank: "energy"},{title: "DEI BILL PAYME", totalAmount: 401.00, totalMonths: 6, startDate: "2025-11-01", monthlyPayment: 66.83, bank: "energy"},{title: "KLARNA (3D Store)", totalAmount: 220.68, totalMonths: 3, startDate: "2026-01-01", monthlyPayment: 73.56, bank: "alpha"}, {title: "COSMOTE INSURANCE (Alpha)", totalAmount: 252.24, totalMonths: 12, startDate: "2025-04-01", monthlyPayment: 21.02, bank: "alpha"},{title: "PITSOULAKIS (Alpha)", totalAmount: 799.00, totalMonths: 12, startDate: "2025-08-01", monthlyPayment: 66.58, bank: "alpha"},{title: "ΠΑΓΚΡΗΤΙΑ ΔΑΝΕΙΟ", totalAmount: 888.0, totalMonths: 24, startDate: "2025-08-01", monthlyPayment: 37.0, bank: "pancreta"}];
+    function runBulkImport() { if(currentUser && confirm("Διαγραφή παλιών και επαναφορά;")) db.collection('users').doc(currentUser.uid).collection('installments').get().then(snap => Promise.all(snap.docs.map(d => d.ref.delete()))).then(() => { const batch = IMPORT_DATA.map(i => { i.createdAt = firebase.firestore.FieldValue.serverTimestamp(); return db.collection('users').doc(currentUser.uid).collection('installments').add(i); }); batch.push(db.collection('users').doc(currentUser.uid).set({budgetList: cashFlowData}, {merge: true})); return Promise.all(batch); }).then(() => location.reload()); }
+
     function loadInstallments() {
-        db.collection('users').doc(currentUser.uid).collection('installments').orderBy('startDate', 'desc').onSnapshot((snapshot) => {
+        db.collection('users').doc(currentUser.uid).collection('installments').onSnapshot((snapshot) => {
             const list = document.getElementById('installmentsList');
             let sumE=0, sumA=0, sumP=0, sumAll=0;
-            list.innerHTML = "";
-
+            let nextSumE=0, nextSumA=0, nextSumP=0; // Next Month Sums
+            
+            // 1. Process and Sort Data in Memory (Client-side Sort)
+            let items = [];
             snapshot.forEach(doc => {
                 const d = doc.data();
+                const start = new Date(d.startDate);
+                const endDate = new Date(start); 
+                endDate.setMonth(start.getMonth() + d.totalMonths);
+                d.id = doc.id;
+                d.endDateObj = endDate; // Store object for sorting
+                items.push(d);
+            });
+
+            // SORT: Earliest End Date First
+            items.sort((a, b) => a.endDateObj - b.endDateObj);
+
+            list.innerHTML = "";
+
+            // 2. Render Loop
+            items.forEach(d => {
                 const start = new Date(d.startDate); const now = new Date(); 
                 let currentInst = ((now.getFullYear() - start.getFullYear()) * 12) + (now.getMonth() - start.getMonth()) + 1;
                 
                 if(currentInst > d.totalMonths) return; 
                 if(currentInst < 1) currentInst = 0; 
                 
+                // Current Month Totals
                 sumAll += d.monthlyPayment;
                 if(d.bank==='energy') sumE+=d.monthlyPayment; else if(d.bank==='alpha') sumA+=d.monthlyPayment; else sumP+=d.monthlyPayment;
 
-                const endDate = new Date(start); endDate.setMonth(start.getMonth() + d.totalMonths - 1);
-                const endStr = endDate.toLocaleDateString('el-GR', {month:'long', year:'numeric'});
+                // Next Month Totals
+                let nextInst = currentInst + 1;
+                if(nextInst <= d.totalMonths && nextInst > 0) {
+                    if(d.bank==='energy') nextSumE+=d.monthlyPayment; else if(d.bank==='alpha') nextSumA+=d.monthlyPayment; else nextSumP+=d.monthlyPayment;
+                }
+
+                // Render Item
+                const endStr = d.endDateObj.toLocaleDateString('el-GR', {month:'long', year:'numeric'});
                 let color = d.bank==='energy' ? 'orange' : (d.bank==='alpha' ? 'red' : 'blue');
                 let badge = d.bank==='energy' ? 'Energy' : (d.bank==='alpha' ? 'Alpha' : 'PAGKR');
-                const nextInst = currentInst + 1;
                 const nextText = nextInst > d.totalMonths ? "ΤΕΛΟΣ" : `Δόση <b>${nextInst}</b> / ${d.totalMonths}`;
 
                 list.insertAdjacentHTML('beforeend', `
@@ -362,34 +325,27 @@
                             <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">📅 Τώρα (ΦΕΒ):</span><span class="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200">Δόση ${currentInst} / ${d.totalMonths}</span></div>
                             <div class="flex justify-between items-center text-sm opacity-60"><span class="text-slate-500 font-medium">🔮 Μετά (ΜΑΡ):</span><span class="font-bold text-slate-800">${nextText}</span></div>
                         </div>
-                        <div class="flex justify-between items-end mt-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Λήξη: <span class="text-slate-600">${endStr}</span></p><div class="flex gap-2"><button onclick="editInstallment('${doc.id}', '${d.title}', ${d.totalAmount}, ${d.totalMonths}, '${d.startDate}', '${d.bank}')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-pencil-alt text-xs"></i></button><button onclick="if(confirm('Διαγραφή;')) db.collection('users').doc(currentUser.uid).collection('installments').doc('${doc.id}').delete()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></div></div>
+                        <div class="flex justify-between items-end mt-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Λήξη: <span class="text-slate-600">${endStr}</span></p><div class="flex gap-2"><button onclick="editInstallment('${d.id}', '${d.title}', ${d.totalAmount}, ${d.totalMonths}, '${d.startDate}', '${d.bank}')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-pencil-alt text-xs"></i></button><button onclick="if(confirm('Διαγραφή;')) db.collection('users').doc(currentUser.uid).collection('installments').doc('${d.id}').delete()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></div></div>
                     </div>
                 `);
             });
 
-            document.getElementById('sumEnergy').innerText = sumE.toFixed(2); document.getElementById('sumAlpha').innerText = sumA.toFixed(2); document.getElementById('sumPancreta').innerText = sumP.toFixed(2);
+            // Update UI Totals (Current & Next)
+            document.getElementById('sumEnergy').innerText = sumE.toFixed(2); document.getElementById('nextSumEnergy').innerText = nextSumE.toFixed(2);
+            document.getElementById('sumAlpha').innerText = sumA.toFixed(2); document.getElementById('nextSumAlpha').innerText = nextSumA.toFixed(2);
+            document.getElementById('sumPancreta').innerText = sumP.toFixed(2); document.getElementById('nextSumPancreta').innerText = nextSumP.toFixed(2);
             globalMonthlyInstallments = sumAll;
         });
     }
 
-    // --- MODAL & EDIT ---
-    function editInstallment(id, t, tot, m, s, b) {
-        document.getElementById('editId').value = id; document.getElementById('modalTitle').innerText = "Επεξεργασία";
-        document.getElementById('inpTitle').value = t; document.getElementById('inpAmount').value = tot;
-        document.getElementById('inpMonths').value = m; document.getElementById('inpDate').value = s;
-        document.querySelectorAll(`input[value="${b}"]`)[0].checked = true;
-        openModal();
-    }
-    function saveInstallment() {
-        const id=document.getElementById('editId').value; const t=document.getElementById('inpTitle').value; 
-        const tot=parseFloat(document.getElementById('inpAmount').value); const m=parseInt(document.getElementById('inpMonths').value);
-        const s=document.getElementById('inpDate').value; const b=document.querySelector('input[name="bankType"]:checked').value;
-        if(!t||!tot||!m||!s) return alert("Λείπουν στοιχεία");
-        const d = {title:t, totalAmount:tot, totalMonths:m, startDate:s, bank:b, monthlyPayment:tot/m};
-        (id ? db.collection('users').doc(currentUser.uid).collection('installments').doc(id).update(d) : db.collection('users').doc(currentUser.uid).collection('installments').add({...d, createdAt: firebase.firestore.FieldValue.serverTimestamp()})).then(()=>closeModal());
-    }
+    // --- MODAL & SCANNER ---
+    function editInstallment(id, t, tot, m, s, b) { document.getElementById('editId').value = id; document.getElementById('modalTitle').innerText = "Επεξεργασία"; document.getElementById('inpTitle').value = t; document.getElementById('inpAmount').value = tot; document.getElementById('inpMonths').value = m; document.getElementById('inpDate').value = s; document.querySelectorAll(`input[value="${b}"]`)[0].checked = true; openModal(); }
+    function saveInstallment() { const id=document.getElementById('editId').value; const t=document.getElementById('inpTitle').value; const tot=parseFloat(document.getElementById('inpAmount').value); const m=parseInt(document.getElementById('inpMonths').value); const s=document.getElementById('inpDate').value; const b=document.querySelector('input[name="bankType"]:checked').value; if(!t||!tot||!m||!s) return alert("Λείπουν στοιχεία"); const d = {title:t, totalAmount:tot, totalMonths:m, startDate:s, bank:b, monthlyPayment:tot/m}; (id ? db.collection('users').doc(currentUser.uid).collection('installments').doc(id).update(d) : db.collection('users').doc(currentUser.uid).collection('installments').add({...d, createdAt: firebase.firestore.FieldValue.serverTimestamp()})).then(()=>closeModal()); }
     function openModal(){ document.getElementById('addModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('addModal').classList.add('active'),10); if(!document.getElementById('inpDate').value) document.getElementById('inpDate').valueAsDate=new Date(); }
     function closeModal(){ document.getElementById('addModal').classList.remove('active'); setTimeout(()=>{document.getElementById('addModal').classList.add('hidden'); document.getElementById('editId').value=""; document.getElementById('modalTitle').innerText="Νέα Δόση"; document.getElementById('inpTitle').value=""; document.getElementById('inpAmount').value="";},200); }
+    function openScannerModal() { document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('pasteArea').value=''; }
+    function closeScannerModal() { document.getElementById('scannerModal').classList.add('hidden'); }
+    function processPastedText() { const text = document.getElementById('pasteArea').value; const bank = document.getElementById('scanBank').value; const instRegex = /(?:DOSH|ΔΟΣΗ|DOSEIS)\s*(\d{1,2})\s*[\/]\s*(\d{1,2})/i; const lines = text.split('\n'); const found = []; let stmtDate = new Date(); const dateMatch = text.match(/(\d{2})\/(\d{2})\/(20\d{2})/); if(dateMatch) stmtDate = new Date(`${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`); lines.forEach(line => { const iMatch = line.match(instRegex); const aMatch = line.match(/(\d+[.,]\d{2})/); if (iMatch && aMatch) { const cur = parseInt(iMatch[1]); const tot = parseInt(iMatch[2]); let amtStr = aMatch[0].replace('.','').replace(',','.'); if(aMatch[0].includes(',')&&aMatch[0].includes('.')) amtStr = aMatch[0].replace('.','').replace(',','.'); else if(aMatch[0].includes(',')) amtStr = aMatch[0].replace(',','.'); const m = Math.abs(parseFloat(amtStr)); let t = line.replace(instRegex, '').replace(aMatch[0], '').replace(/\d{2}\/\d{2}\/\d{4}/, '').trim().substring(0,30); const s = new Date(stmtDate); s.setMonth(s.getMonth() - (cur - 1)); found.push({title:t, totalAmount:m*tot, totalMonths:tot, startDate:s.toISOString().split('T')[0], monthlyPayment:m, bank:bank, createdAt: firebase.firestore.FieldValue.serverTimestamp()}); } }); if(found.length && confirm(`Βρέθηκαν ${found.length}. Εισαγωγή;`)) Promise.all(found.map(i => db.collection('users').doc(currentUser.uid).collection('installments').add(i))).then(()=>{ alert("ΟΚ!"); closeScannerModal(); }); }
 </script>
 </body>
 </html>
