@@ -70,8 +70,8 @@
         
         <div id="importArea" class="hidden p-5 bg-blue-50 border border-blue-100 rounded-2xl text-center shadow-sm">
             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-3 text-xl"><i class="fas fa-magic"></i></div>
-            <h3 class="font-bold text-blue-900 text-lg">Εισαγωγή Δεδομένων</h3>
-            <p class="text-sm text-blue-700 mb-4 opacity-80">Πάτα το κουμπί για να περάσεις τις <b>σωστές ημερομηνίες</b> που υπολογίσαμε.</p>
+            <h3 class="font-bold text-blue-900 text-lg">Επαναφορά Δεδομένων</h3>
+            <p class="text-sm text-blue-700 mb-4 opacity-80">Πάτα το κουμπί για να σβήσεις τα πάντα και να φορτώσεις τις <b>σωστές δόσεις</b>.</p>
             <button onclick="runBulkImport()" id="btnImport" class="w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition">
                 📥 Εισαγωγή από PDF
             </button>
@@ -213,7 +213,6 @@
 
     // --- CALCULATED START DATES FOR FEB 2026 PAYMENT ---
     // Rule: Current Payment = Feb 2026.
-    // Example: EVIKOON is 12/24 in Feb 2026. Start Date = March 2025.
     const IMPORT_DATA = [
         {title: "EVIKOON", totalAmount: 950.00, totalMonths: 24, startDate: "2025-03-01", monthlyPayment: 39.58, bank: "energy"},
         {title: "DANDALIS TEAM", totalAmount: 250.00, totalMonths: 6, startDate: "2025-12-01", monthlyPayment: 41.66, bank: "energy"},
@@ -277,35 +276,25 @@
             const list = document.getElementById('installmentsList');
             let sumE=0, sumA=0, sumP=0, sumAll=0, count=0;
             list.innerHTML = "";
-            if(!snapshot.empty) document.getElementById('importArea').classList.add('hidden');
+            // REMOVED THE HIDE LOGIC HERE - BUTTON STAYS VISIBLE
 
             snapshot.forEach(doc => {
                 const d = doc.data();
                 const start = new Date(d.startDate); const now = new Date(); // Feb 2026
-                
-                // Calculate current installment index for Feb 2026
-                // Formula: (CurrentYear - StartYear)*12 + (CurrentMonth - StartMonth) + 1
                 let currentInst = ((now.getFullYear() - start.getFullYear()) * 12) + (now.getMonth() - start.getMonth()) + 1;
-                
-                // If finished, don't show or show as finished
                 const isFinished = currentInst > d.totalMonths;
-                if(isFinished) return; // Don't show finished
+                if(isFinished) return;
                 
-                if(currentInst < 1) currentInst = 0; // Future
-
-                // Add to totals
+                if(currentInst < 1) currentInst = 0; 
                 sumAll += d.monthlyPayment; count++;
                 if(d.bank==='energy') sumE+=d.monthlyPayment; else if(d.bank==='alpha') sumA+=d.monthlyPayment; else sumP+=d.monthlyPayment;
 
-                // End Date String
                 const endDate = new Date(start); endDate.setMonth(start.getMonth() + d.totalMonths - 1);
                 const endStr = endDate.toLocaleDateString('el-GR', {month:'long', year:'numeric'});
 
-                // Colors
                 let color = d.bank==='energy' ? 'orange' : (d.bank==='alpha' ? 'red' : 'blue');
                 let badge = d.bank==='energy' ? 'Energy' : (d.bank==='alpha' ? 'Alpha' : 'PAGKR');
                 
-                // Next Month Logic
                 const nextInst = currentInst + 1;
                 const nextText = nextInst > d.totalMonths ? "ΤΕΛΟΣ" : `Δόση <b>${nextInst}</b> / ${d.totalMonths}`;
 
@@ -315,7 +304,6 @@
                             <div><h4 class="font-bold text-slate-800 text-lg">${d.title}</h4><span class="bg-${color}-100 text-${color}-800 text-[10px] px-2 py-1 rounded font-bold uppercase">${badge}</span></div>
                             <span class="font-bold text-xl text-slate-900">${d.monthlyPayment.toFixed(2)}€</span>
                         </div>
-                        
                         <div class="mt-4 space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-slate-500 font-medium">📅 Τώρα (ΦΕΒ):</span>
@@ -326,7 +314,6 @@
                                 <span class="font-bold text-slate-800">${nextText}</span>
                             </div>
                         </div>
-
                         <div class="flex justify-between items-end mt-3">
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Λήξη: <span class="text-slate-600">${endStr}</span></p>
                             <div class="flex gap-2">
