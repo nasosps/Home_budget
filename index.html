@@ -120,7 +120,7 @@
                 <h1 class="text-lg font-bold tracking-tight"><i class="fas fa-wallet mr-2 text-blue-400"></i> Οικονομικά
                 </h1>
                 <div class="flex gap-2">
-                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v9.0</span>
+                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v9.1</span>
                     <button id="logoutBtn"
                         class="hidden text-xs bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-600">Έξοδος</button>
                 </div>
@@ -157,6 +157,56 @@
             <div id="tab-cards" class="tab-content hidden space-y-6">
 
                 <div class="flex flex-col space-y-3">
+                    <!-- Car Loan Widget -->
+                    <div id="carLoanWidget"
+                        class="bg-slate-800 text-white p-5 rounded-3xl shadow-xl border border-slate-700 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-slate-700">
+                            <div id="carProgress" class="h-full bg-emerald-500 transition-all duration-1000"
+                                style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between items-start mb-4 mt-2">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-slate-700 p-2 rounded-xl text-emerald-400"><i class="fas fa-car"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg leading-tight">Αυτοκίνητο</h3>
+                                    <p class="text-[10px] text-slate-400 font-mono" id="carEnds">--</p>
+                                </div>
+                            </div>
+                            <button onclick="openCarModal()"
+                                class="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition"><i
+                                    class="fas fa-cog text-xs text-slate-300"></i></button>
+                        </div>
+
+                        <div class="mb-2 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Συνολικο
+                                Κοστος</span>
+                            <div class="text-white font-bold text-sm tracking-wide" id="carTotalCost">--€</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-slate-700/50 p-3 rounded-2xl">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Δοση</p>
+                                <p class="text-xl font-bold" id="carDoseis">--</p>
+                            </div>
+                            <div class="bg-slate-700/50 p-3 rounded-2xl">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Εμειναν</p>
+                                <p class="text-xl font-bold text-emerald-400" id="carInstLeft">--</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs border-b border-slate-700 pb-2">
+                                <span class="text-slate-400">Πληρώθηκαν</span>
+                                <span class="font-bold text-slate-200" id="carPaid">--€</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-300 font-bold">Υπόλοιπο</span>
+                                <span class="font-bold text-emerald-400 text-lg" id="carRemaining">--€</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div
                         class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
                         <div class="flex items-center gap-3">
@@ -284,21 +334,24 @@
                                 <div
                                     class="border-2 border-slate-100 rounded-2xl p-3 text-center peer-checked:bg-orange-500 peer-checked:text-white transition">
                                     <i class="fas fa-bolt block mb-1 text-lg"></i> <span
-                                        class="text-xs font-bold">Energy</span></div>
+                                        class="text-xs font-bold">Energy</span>
+                                </div>
                             </label>
                             <label class="cursor-pointer relative"><input type="radio" name="bankType" value="alpha"
                                     class="peer hidden">
                                 <div
                                     class="border-2 border-slate-100 rounded-2xl p-3 text-center peer-checked:bg-red-900 peer-checked:text-white transition">
                                     <i class="fab fa-cc-mastercard block mb-1 text-lg"></i> <span
-                                        class="text-xs font-bold">Alpha</span></div>
+                                        class="text-xs font-bold">Alpha</span>
+                                </div>
                             </label>
                             <label class="cursor-pointer relative"><input type="radio" name="bankType" value="pancreta"
                                     class="peer hidden">
                                 <div
                                     class="border-2 border-slate-100 rounded-2xl p-3 text-center peer-checked:bg-blue-600 peer-checked:text-white transition">
                                     <i class="fas fa-university block mb-1 text-lg"></i> <span
-                                        class="text-xs font-bold">Παγκρ.</span></div>
+                                        class="text-xs font-bold">Παγκρ.</span>
+                                </div>
                             </label>
                         </div>
                     </div>
@@ -323,6 +376,46 @@
                     </div>
                     <button onclick="saveInstallment()" id="saveBtn"
                         class="w-full bg-slate-900 text-white p-5 rounded-2xl font-bold mt-2 shadow-xl">Αποθήκευση</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="carModal"
+            class="modal fixed inset-0 bg-black/80 z-50 hidden flex items-end justify-center backdrop-blur-sm"
+            onclick="if(event.target === this) closeCarModal()">
+            <div
+                class="modal-content bg-slate-900 w-full max-w-md rounded-t-[2rem] p-8 shadow-2xl h-[auto] border-t border-slate-700">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white"><i class="fas fa-car mr-2 text-emerald-500"></i> Ρυθμίσεις
+                        Δανείου</h3>
+                    <button onclick="closeCarModal()"
+                        class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white"><i
+                            class="fas fa-times"></i></button>
+                </div>
+
+                <div class="space-y-5">
+                    <div><label class="text-xs font-bold text-slate-500 uppercase ml-1">Ημερομηνια Εναρξης</label><input
+                            type="date" id="inpCarStart"
+                            class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-medium text-white outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1"><label class="text-xs font-bold text-slate-500 uppercase ml-1">Συνολικες
+                                Δοσεις</label><input type="number" id="inpCarMonths"
+                                class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-mono font-bold text-white outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="flex-1"><label class="text-xs font-bold text-slate-500 uppercase ml-1">Ποσο
+                                Δοσης</label><input type="number" id="inpCarAmount"
+                                class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-mono font-bold text-white outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <div><label class="text-xs font-bold text-slate-500 uppercase ml-1">Προκαταβολή</label><input
+                            type="number" id="inpCarDown"
+                            class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-mono font-bold text-white outline-none focus:border-emerald-500">
+                    </div>
+
+                    <button onclick="saveCarLoanFromModal()"
+                        class="w-full bg-emerald-600 text-white p-5 rounded-2xl font-bold mt-4 shadow-lg hover:bg-emerald-500 transition">Αποθήκευση</button>
                 </div>
             </div>
         </div>
@@ -389,7 +482,7 @@
             if (user) {
                 currentUser = user;
                 ['loginView'].forEach(id => document.getElementById(id).classList.add('hidden'));['navTabs', 'logoutBtn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-                switchTab('cards'); loadInstallments(); loadCashFlow();
+                switchTab('cards'); loadInstallments(); loadCashFlow(); loadCarLoan();
             } else {
                 currentUser = null;
                 document.getElementById('loginView').classList.remove('hidden');['navTabs', 'logoutBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
@@ -397,6 +490,89 @@
         });
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
         function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('emailInput').value, document.getElementById('passInput').value).catch(e => document.getElementById('loginMsg').innerText = "Λάθος στοιχεία"); }
+
+        // --- CAR LOAN LOGIC ---
+        let carLoanData = { startDate: '2023-05-01', totalMonths: 65, monthlyPayment: 250, balloon: 0, downPayment: 1500 };
+
+        function loadCarLoan() {
+            db.collection('users').doc(currentUser.uid).collection('car_loan').doc('details').onSnapshot(doc => {
+                if (doc.exists) {
+                    carLoanData = { ...carLoanData, ...doc.data() };
+                } else {
+                    saveCarLoanData(carLoanData);
+                }
+                renderCarLoan();
+            });
+        }
+
+        function saveCarLoanData(data) {
+            db.collection('users').doc(currentUser.uid).collection('car_loan').doc('details').set(data);
+        }
+
+        function renderCarLoan() {
+            const start = new Date(carLoanData.startDate);
+            const now = new Date();
+            let monthsPassed = ((now.getFullYear() - start.getFullYear()) * 12) + (now.getMonth() - start.getMonth());
+
+            let currentInst = monthsPassed + 1;
+
+            if (currentInst > carLoanData.totalMonths) currentInst = carLoanData.totalMonths;
+            if (currentInst < 0) currentInst = 0;
+
+            const installmentsPaid = currentInst > 0 ? (currentInst - 1) : 0;
+            const paidSoFar = (installmentsPaid * carLoanData.monthlyPayment) + (carLoanData.downPayment || 0);
+
+            const installmentsLeft = carLoanData.totalMonths - installmentsPaid;
+            const remainingAmount = installmentsLeft * carLoanData.monthlyPayment;
+
+            const endDate = new Date(start);
+            endDate.setMonth(start.getMonth() + carLoanData.totalMonths - 1);
+
+            // Totals
+            const totalPrincipal = (carLoanData.totalMonths * carLoanData.monthlyPayment) + (carLoanData.downPayment || 0);
+
+            const container = document.getElementById('carLoanWidget');
+            if (!container) return;
+
+            document.getElementById('carDoseis').innerText = `${currentInst} / ${carLoanData.totalMonths}`;
+            document.getElementById('carPaid').innerText = paidSoFar.toLocaleString() + '€';
+            document.getElementById('carRemaining').innerText = remainingAmount.toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+            document.getElementById('carTotalCost').innerText = totalPrincipal.toLocaleString('el-GR') + '€';
+            document.getElementById('carEnds').innerText = endDate.toLocaleDateString('el-GR', { month: 'short', year: 'numeric' });
+            document.getElementById('carInstLeft').innerText = installmentsLeft;
+
+            const percent = ((currentInst) / carLoanData.totalMonths) * 100;
+            document.getElementById('carProgress').style.width = `${percent}%`;
+        }
+
+        function openCarModal() {
+            document.getElementById('carModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('carModal').classList.add('active'), 10);
+
+            document.getElementById('inpCarStart').value = carLoanData.startDate;
+            document.getElementById('inpCarMonths').value = carLoanData.totalMonths;
+            document.getElementById('inpCarAmount').value = carLoanData.monthlyPayment;
+            document.getElementById('inpCarDown').value = carLoanData.downPayment || 0;
+        }
+
+        function saveCarLoanFromModal() {
+            const s = document.getElementById('inpCarStart').value;
+            const m = parseInt(document.getElementById('inpCarMonths').value);
+            const a = parseFloat(document.getElementById('inpCarAmount').value);
+            const d = parseFloat(document.getElementById('inpCarDown').value);
+
+            if (!s || !m || !a) return alert("Λείπουν στοιχεία");
+
+            const newData = { startDate: s, totalMonths: m, monthlyPayment: a, balloon: 0, downPayment: d };
+            saveCarLoanData(newData);
+            closeCarModal();
+        }
+
+        function closeCarModal() {
+            document.getElementById('carModal').classList.remove('active');
+            setTimeout(() => document.getElementById('carModal').classList.add('hidden'), 200);
+        }
+
 
         // --- INSTALLMENTS LOGIC ---
         function loadInstallments() {
