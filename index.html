@@ -645,6 +645,11 @@
         function openModal() { document.getElementById('addModal').classList.remove('hidden'); setTimeout(() => document.getElementById('addModal').classList.add('active'), 10); if (!document.getElementById('inpDate').value) document.getElementById('inpDate').valueAsDate = new Date(); }
         function closeModal() { document.getElementById('addModal').classList.remove('active'); setTimeout(() => { document.getElementById('addModal').classList.add('hidden'); document.getElementById('editId').value = ""; document.getElementById('modalTitle').innerText = "Νέα Δόση"; document.getElementById('inpTitle').value = ""; document.getElementById('inpAmount').value = ""; }, 200); }
     </script>
+<!-- NAEL credit -->
+<div id="nael-credit" style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;width:fit-content;max-width:calc(100% - 24px);margin:20px auto 12px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.72);font-family:inherit;font-size:12px;line-height:1.4;font-weight:500;color:#102330;text-align:center;">
+  <span>created by NAEL -</span>
+  <a href="https://nasosps.github.io/page/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">Link</a>
+</div>
 </body>
 
 </html>
