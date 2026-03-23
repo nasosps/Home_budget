@@ -6,12 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Οικονομικά Σπιτιού</title>
 
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#10b981">
@@ -120,7 +117,7 @@
                 <h1 class="text-lg font-bold tracking-tight"><i class="fas fa-wallet mr-2 text-blue-400"></i> Οικονομικά
                 </h1>
                 <div class="flex gap-2">
-                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v9.1</span>
+                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v10.0</span>
                     <button id="logoutBtn"
                         class="hidden text-xs bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-600">Έξοδος</button>
                 </div>
@@ -136,6 +133,29 @@
                 <div onclick="switchTab('summary')" class="nav-btn" id="tabBtn-summary">
                     <i class="nav-icon fas fa-chart-pie"></i> Σύνοψη
                 </div>
+            </div>
+
+            <div id="monthControls" class="hidden px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                <div class="flex items-center gap-2">
+                    <button id="monthPrevBtn" type="button"
+                        class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 flex items-center justify-center">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <div class="flex-1">
+                        <label for="monthPicker" class="block text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1">Μήνας προβολής</label>
+                        <div class="flex items-center gap-2">
+                            <input id="monthPicker" type="month"
+                                class="flex-1 min-w-0 p-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 outline-none">
+                            <button id="monthTodayBtn" type="button"
+                                class="px-3 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold whitespace-nowrap">Σήμερα</button>
+                        </div>
+                    </div>
+                    <button id="monthNextBtn" type="button"
+                        class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 flex items-center justify-center">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+                <p id="monthDisplayLabel" class="mt-2 text-xs text-slate-500 font-medium">--</p>
             </div>
         </div>
 
@@ -214,9 +234,9 @@
                                 class="font-bold">ENERGY</span>
                         </div>
                         <div class="text-right">
-                            <span class="text-xs opacity-70 block uppercase">Τωρα</span>
+                            <span id="sumEnergyLabel" class="text-xs opacity-70 block uppercase">Τωρα</span>
                             <span class="text-2xl font-bold">€ <span id="sumEnergy">0</span></span>
-                            <p class="text-[10px] opacity-80 mt-1 font-mono">Επόμ: <span id="nextSumEnergy">0</span>€
+                            <p class="text-[10px] opacity-80 mt-1 font-mono"><span id="nextSumEnergyLabel">Επόμ</span>: <span id="nextSumEnergy">0</span>€
                             </p>
                         </div>
                     </div>
@@ -227,9 +247,9 @@
                                 class="font-bold">ALPHA</span>
                         </div>
                         <div class="text-right">
-                            <span class="text-xs opacity-70 block uppercase">Τωρα</span>
+                            <span id="sumAlphaLabel" class="text-xs opacity-70 block uppercase">Τωρα</span>
                             <span class="text-2xl font-bold">€ <span id="sumAlpha">0</span></span>
-                            <p class="text-[10px] opacity-80 mt-1 font-mono">Επόμ: <span id="nextSumAlpha">0</span>€</p>
+                            <p class="text-[10px] opacity-80 mt-1 font-mono"><span id="nextSumAlphaLabel">Επόμ</span>: <span id="nextSumAlpha">0</span>€</p>
                         </div>
                     </div>
                     <div
@@ -239,9 +259,9 @@
                                 class="font-bold">ΠΑΓΚΡΗΤΙΑ</span>
                         </div>
                         <div class="text-right">
-                            <span class="text-xs opacity-70 block uppercase">Τωρα</span>
+                            <span id="sumPancretaLabel" class="text-xs opacity-70 block uppercase">Τωρα</span>
                             <span class="text-2xl font-bold">€ <span id="sumPancreta">0</span></span>
-                            <p class="text-[10px] opacity-80 mt-1 font-mono">Επόμ: <span id="nextSumPancreta">0</span>€
+                            <p class="text-[10px] opacity-80 mt-1 font-mono"><span id="nextSumPancretaLabel">Επόμ</span>: <span id="nextSumPancreta">0</span>€
                             </p>
                         </div>
                     </div>
@@ -249,6 +269,18 @@
 
                 <div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Λιστα (Ληξη συντομα)</h3>
+                    <div id="importOverviewCard" class="hidden mb-3 bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">PDF Sync</p>
+                                <p id="importOverviewPrimary" class="text-sm font-bold text-slate-800 mt-1">--</p>
+                                <p id="importOverviewSecondary" class="text-xs text-slate-500 mt-1">--</p>
+                            </div>
+                            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                        </div>
+                    </div>
                     <div id="installmentsList" class="space-y-3 pb-20"></div>
                 </div>
             </div>
@@ -288,7 +320,7 @@
             </div>
 
             <div id="tab-summary" class="tab-content hidden space-y-6 text-center pt-4">
-                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Τελικο Διαθεσιμο (Φεβρουαριος)
+                <h2 id="summaryTitle" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Τελικό Διαθέσιμο
                 </h2>
                 <div class="relative inline-block">
                     <span class="text-6xl font-black text-slate-800 tracking-tighter" id="grandTotalSummary">--</span>
@@ -421,235 +453,14 @@
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyDV6btFSq5IeQlVq7YihlJOkaKam-MrsJQ", authDomain: "home-budget-gr.firebaseapp.com", projectId: "home-budget-gr", storageBucket: "home-budget-gr.firebasestorage.app", messagingSenderId: "530104677253", appId: "1:530104677253:web:3e166ea9ec706f60384aec", measurementId: "G-BLBX2JZR15" };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        let currentUser = null;
-        let globalMonthlyInstallments = 0;
+    <div id="nael-credit"
+        style="margin:20px auto 12px;text-align:center;font-family:inherit;font-size:12px;line-height:1.5;font-weight:500;color:inherit;opacity:0.72;">
+        <span>created by NAEL -</span>
+        <a href="https://nasosps.github.io/page/" target="_blank" rel="noopener"
+            style="color:inherit;text-decoration:underline;text-underline-offset:3px;">Link</a>
+    </div>
 
-        // Default Data with Structure for Lists
-        let cashFlowData = {
-            income: [{ id: 1, title: 'Μισθός Νάσου', amount: 1400 }, { id: 2, title: 'Μισθός Ελπίδας', amount: 410 }],
-            expenses: [{ id: 1, title: 'Δάνειο Αυτοκινήτου', amount: 250 }, { id: 2, title: 'Super Market', amount: 400 }, { id: 3, title: 'Ρεύμα', amount: 170 }, { id: 4, title: 'Καύσιμα', amount: 150 }, { id: 5, title: 'Ψυχοθεραπείες', amount: 180 }]
-        };
-
-        // --- NAVIGATION ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('tabBtn-' + tabName).classList.add('active');
-            if (tabName === 'cards') document.getElementById('fabBtn').classList.remove('hidden'); else document.getElementById('fabBtn').classList.add('hidden');
-            if (tabName === 'summary') updateSummaryView();
-        }
-
-        // --- CASH FLOW LOGIC ---
-        function loadCashFlow() {
-            db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
-                if (doc.exists && doc.data().budgetList) { cashFlowData = doc.data().budgetList; renderCashFlow(); }
-                else { saveCashFlow(); renderCashFlow(); }
-            });
-        }
-        function saveCashFlow() { db.collection('users').doc(currentUser.uid).set({ budgetList: cashFlowData }, { merge: true }); updateCashFlowTotals(); }
-
-        function renderCashFlow() {
-            const incList = document.getElementById('incomeList'); const expList = document.getElementById('expensesList');
-            incList.innerHTML = ''; expList.innerHTML = '';
-            cashFlowData.income.forEach((item, index) => { incList.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-center"><input type="text" value="${item.title}" onchange="updateCashFlowItem('income', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-green-500"><input type="number" value="${item.amount}" onchange="updateCashFlowItem('income', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-green-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-green-500"><button onclick="deleteCashFlowItem('income', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button></div>`); });
-            cashFlowData.expenses.forEach((item, index) => { expList.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-center"><input type="text" value="${item.title}" onchange="updateCashFlowItem('expenses', ${index}, 'title', this.value)" class="flex-grow p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 focus:outline-none focus:border-red-500"><input type="number" value="${item.amount}" onchange="updateCashFlowItem('expenses', ${index}, 'amount', this.value)" class="w-24 p-3 rounded-xl border border-red-200 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-red-500"><button onclick="deleteCashFlowItem('expenses', ${index})" class="w-8 h-8 text-red-300 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash"></i></button></div>`); });
-            updateCashFlowTotals();
-        }
-        function addCashFlowItem(type) { cashFlowData[type].push({ title: '', amount: 0 }); saveCashFlow(); renderCashFlow(); }
-        function updateCashFlowItem(type, index, field, value) { if (field === 'amount') value = parseFloat(value) || 0; cashFlowData[type][index][field] = value; saveCashFlow(); }
-        function deleteCashFlowItem(type, index) { if (confirm('Διαγραφή;')) { cashFlowData[type].splice(index, 1); saveCashFlow(); renderCashFlow(); } }
-        function updateCashFlowTotals() {
-            const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0); const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
-            document.getElementById('totalIncomeDisplay').innerText = totalInc + '€'; document.getElementById('totalFixedDisplay').innerText = totalExp + '€';
-        }
-        function updateSummaryView() {
-            const totalInc = cashFlowData.income.reduce((sum, i) => sum + i.amount, 0); const totalExp = cashFlowData.expenses.reduce((sum, i) => sum + i.amount, 0);
-            document.getElementById('sumInc').innerText = totalInc.toLocaleString() + '€'; document.getElementById('sumFix').innerText = totalExp.toLocaleString() + '€';
-            document.getElementById('sumCards').innerText = globalMonthlyInstallments.toFixed(0) + '€';
-            const grand = totalInc - totalExp - globalMonthlyInstallments;
-            document.getElementById('grandTotalSummary').innerText = grand.toLocaleString('el-GR', { maximumFractionDigits: 0 });
-            document.getElementById('grandTotalSummary').className = `text-6xl font-black tracking-tighter ${grand < 0 ? 'text-red-500' : 'text-slate-800'}`;
-        }
-
-        // --- AUTH & INIT ---
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                ['loginView'].forEach(id => document.getElementById(id).classList.add('hidden'));['navTabs', 'logoutBtn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-                switchTab('cards'); loadInstallments(); loadCashFlow(); loadCarLoan();
-            } else {
-                currentUser = null;
-                document.getElementById('loginView').classList.remove('hidden');['navTabs', 'logoutBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
-            }
-        });
-        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
-        function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('emailInput').value, document.getElementById('passInput').value).catch(e => document.getElementById('loginMsg').innerText = "Λάθος στοιχεία"); }
-
-        // --- CAR LOAN LOGIC ---
-        let carLoanData = { startDate: '2023-05-01', totalMonths: 65, monthlyPayment: 250, balloon: 0, downPayment: 1500 };
-
-        function loadCarLoan() {
-            db.collection('users').doc(currentUser.uid).collection('car_loan').doc('details').onSnapshot(doc => {
-                if (doc.exists) {
-                    carLoanData = { ...carLoanData, ...doc.data() };
-                } else {
-                    saveCarLoanData(carLoanData);
-                }
-                renderCarLoan();
-            });
-        }
-
-        function saveCarLoanData(data) {
-            db.collection('users').doc(currentUser.uid).collection('car_loan').doc('details').set(data);
-        }
-
-        function renderCarLoan() {
-            const start = new Date(carLoanData.startDate);
-            const now = new Date();
-            let monthsPassed = ((now.getFullYear() - start.getFullYear()) * 12) + (now.getMonth() - start.getMonth());
-
-            let currentInst = monthsPassed + 1;
-
-            if (currentInst > carLoanData.totalMonths) currentInst = carLoanData.totalMonths;
-            if (currentInst < 0) currentInst = 0;
-
-            const installmentsPaid = currentInst > 0 ? (currentInst - 1) : 0;
-            const paidSoFar = (installmentsPaid * carLoanData.monthlyPayment) + (carLoanData.downPayment || 0);
-
-            const installmentsLeft = carLoanData.totalMonths - installmentsPaid;
-            const remainingAmount = installmentsLeft * carLoanData.monthlyPayment;
-
-            const endDate = new Date(start);
-            endDate.setMonth(start.getMonth() + carLoanData.totalMonths - 1);
-
-            // Totals
-            const totalPrincipal = (carLoanData.totalMonths * carLoanData.monthlyPayment) + (carLoanData.downPayment || 0);
-
-            const container = document.getElementById('carLoanWidget');
-            if (!container) return;
-
-            document.getElementById('carDoseis').innerText = `${currentInst} / ${carLoanData.totalMonths}`;
-            document.getElementById('carPaid').innerText = paidSoFar.toLocaleString() + '€';
-            document.getElementById('carRemaining').innerText = remainingAmount.toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
-            document.getElementById('carTotalCost').innerText = totalPrincipal.toLocaleString('el-GR') + '€';
-            document.getElementById('carEnds').innerText = endDate.toLocaleDateString('el-GR', { month: 'short', year: 'numeric' });
-            document.getElementById('carInstLeft').innerText = installmentsLeft;
-
-            const percent = ((currentInst) / carLoanData.totalMonths) * 100;
-            document.getElementById('carProgress').style.width = `${percent}%`;
-        }
-
-        function openCarModal() {
-            document.getElementById('carModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('carModal').classList.add('active'), 10);
-
-            document.getElementById('inpCarStart').value = carLoanData.startDate;
-            document.getElementById('inpCarMonths').value = carLoanData.totalMonths;
-            document.getElementById('inpCarAmount').value = carLoanData.monthlyPayment;
-            document.getElementById('inpCarDown').value = carLoanData.downPayment || 0;
-        }
-
-        function saveCarLoanFromModal() {
-            const s = document.getElementById('inpCarStart').value;
-            const m = parseInt(document.getElementById('inpCarMonths').value);
-            const a = parseFloat(document.getElementById('inpCarAmount').value);
-            const d = parseFloat(document.getElementById('inpCarDown').value);
-
-            if (!s || !m || !a) return alert("Λείπουν στοιχεία");
-
-            const newData = { startDate: s, totalMonths: m, monthlyPayment: a, balloon: 0, downPayment: d };
-            saveCarLoanData(newData);
-            closeCarModal();
-        }
-
-        function closeCarModal() {
-            document.getElementById('carModal').classList.remove('active');
-            setTimeout(() => document.getElementById('carModal').classList.add('hidden'), 200);
-        }
-
-
-        // --- INSTALLMENTS LOGIC ---
-        function loadInstallments() {
-            db.collection('users').doc(currentUser.uid).collection('installments').onSnapshot((snapshot) => {
-                const list = document.getElementById('installmentsList');
-                let sumE = 0, sumA = 0, sumP = 0, sumAll = 0;
-                let nextSumE = 0, nextSumA = 0, nextSumP = 0;
-
-                let items = [];
-                snapshot.forEach(doc => {
-                    const d = doc.data();
-                    const start = new Date(d.startDate);
-                    const endDate = new Date(start);
-                    endDate.setMonth(start.getMonth() + d.totalMonths);
-                    d.id = doc.id;
-                    d.endDateObj = endDate;
-                    items.push(d);
-                });
-
-                // SORT: Earliest End Date First
-                items.sort((a, b) => a.endDateObj - b.endDateObj);
-
-                list.innerHTML = "";
-
-                items.forEach(d => {
-                    const start = new Date(d.startDate); const now = new Date();
-                    let currentInst = ((now.getFullYear() - start.getFullYear()) * 12) + (now.getMonth() - start.getMonth()) + 1;
-
-                    if (currentInst > d.totalMonths) return;
-                    if (currentInst < 1) currentInst = 0;
-
-                    sumAll += d.monthlyPayment;
-                    if (d.bank === 'energy') sumE += d.monthlyPayment; else if (d.bank === 'alpha') sumA += d.monthlyPayment; else sumP += d.monthlyPayment;
-
-                    let nextInst = currentInst + 1;
-                    if (nextInst <= d.totalMonths && nextInst > 0) {
-                        if (d.bank === 'energy') nextSumE += d.monthlyPayment; else if (d.bank === 'alpha') nextSumA += d.monthlyPayment; else nextSumP += d.monthlyPayment;
-                    }
-
-                    const endStr = d.endDateObj.toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
-                    let color = d.bank === 'energy' ? 'orange' : (d.bank === 'alpha' ? 'red' : 'blue');
-                    let badge = d.bank === 'energy' ? 'Energy' : (d.bank === 'alpha' ? 'Alpha' : 'PAGKR');
-                    const nextText = nextInst > d.totalMonths ? "ΤΕΛΟΣ" : `Δόση <b>${nextInst}</b> / ${d.totalMonths}`;
-
-                    list.insertAdjacentHTML('beforeend', `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border-l-8 border-${color}-500 relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <div><h4 class="font-bold text-slate-800 text-lg">${d.title}</h4><span class="bg-${color}-100 text-${color}-800 text-[10px] px-2 py-1 rounded font-bold uppercase">${badge}</span></div>
-                            <span class="font-bold text-xl text-slate-900">${d.monthlyPayment.toFixed(2)}€</span>
-                        </div>
-                        <div class="mt-4 space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">📅 Τώρα (ΦΕΒ):</span><span class="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200">Δόση ${currentInst} / ${d.totalMonths}</span></div>
-                            <div class="flex justify-between items-center text-sm opacity-60"><span class="text-slate-500 font-medium">🔮 Μετά (ΜΑΡ):</span><span class="font-bold text-slate-800">${nextText}</span></div>
-                        </div>
-                        <div class="flex justify-between items-end mt-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Λήξη: <span class="text-slate-600">${endStr}</span></p><div class="flex gap-2"><button onclick="editInstallment('${d.id}', '${d.title}', ${d.totalAmount}, ${d.totalMonths}, '${d.startDate}', '${d.bank}')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-pencil-alt text-xs"></i></button><button onclick="if(confirm('Διαγραφή;')) db.collection('users').doc(currentUser.uid).collection('installments').doc('${d.id}').delete()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-red-500 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></div></div>
-                    </div>
-                `);
-                });
-
-                document.getElementById('sumEnergy').innerText = sumE.toFixed(2); document.getElementById('nextSumEnergy').innerText = nextSumE.toFixed(2);
-                document.getElementById('sumAlpha').innerText = sumA.toFixed(2); document.getElementById('nextSumAlpha').innerText = nextSumA.toFixed(2);
-                document.getElementById('sumPancreta').innerText = sumP.toFixed(2); document.getElementById('nextSumPancreta').innerText = nextSumP.toFixed(2);
-                globalMonthlyInstallments = sumAll;
-            });
-        }
-
-        // --- MODAL ---
-        function editInstallment(id, t, tot, m, s, b) { document.getElementById('editId').value = id; document.getElementById('modalTitle').innerText = "Επεξεργασία"; document.getElementById('inpTitle').value = t; document.getElementById('inpAmount').value = tot; document.getElementById('inpMonths').value = m; document.getElementById('inpDate').value = s; document.querySelectorAll(`input[value="${b}"]`)[0].checked = true; openModal(); }
-        function saveInstallment() { const id = document.getElementById('editId').value; const t = document.getElementById('inpTitle').value; const tot = parseFloat(document.getElementById('inpAmount').value); const m = parseInt(document.getElementById('inpMonths').value); const s = document.getElementById('inpDate').value; const b = document.querySelector('input[name="bankType"]:checked').value; if (!t || !tot || !m || !s) return alert("Λείπουν στοιχεία"); const d = { title: t, totalAmount: tot, totalMonths: m, startDate: s, bank: b, monthlyPayment: tot / m }; (id ? db.collection('users').doc(currentUser.uid).collection('installments').doc(id).update(d) : db.collection('users').doc(currentUser.uid).collection('installments').add({ ...d, createdAt: firebase.firestore.FieldValue.serverTimestamp() })).then(() => closeModal()); }
-        function openModal() { document.getElementById('addModal').classList.remove('hidden'); setTimeout(() => document.getElementById('addModal').classList.add('active'), 10); if (!document.getElementById('inpDate').value) document.getElementById('inpDate').valueAsDate = new Date(); }
-        function closeModal() { document.getElementById('addModal').classList.remove('active'); setTimeout(() => { document.getElementById('addModal').classList.add('hidden'); document.getElementById('editId').value = ""; document.getElementById('modalTitle').innerText = "Νέα Δόση"; document.getElementById('inpTitle').value = ""; document.getElementById('inpAmount').value = ""; }, 200); }
-    </script>
-<!-- NAEL credit -->
-<div id="nael-credit" style="margin:20px auto 12px;text-align:center;font-family:inherit;font-size:12px;line-height:1.5;font-weight:500;color:inherit;opacity:0.72;">
-  <span>created by NAEL -</span>
-  <a href="https://nasosps.github.io/page/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">Link</a>
-</div>
+    <script type="module" src="./app.js"></script>
 </body>
 
 </html>

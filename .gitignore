@@ -1,0 +1,21 @@
+# Sensitive local bank inputs
+bank_files/*
+!bank_files/.gitkeep
+!bank_files/README.md
+old_*.png
+
+# Local progress and generated work products
+.local/
+logs/
+tmp/
+.playwright-cli/
+output/playwright/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
