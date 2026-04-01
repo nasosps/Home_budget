@@ -1,4 +1,4 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.101.1/+esm";
 
 const SUPABASE_URL = "https://vfegqdxpvdltwesggdwd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_xLG3cL_kr9UqA61czA5m6w_Gwn9oBLJ";
@@ -78,6 +78,14 @@ let lastSessionUserId = "";
 
 function $(id) {
     return document.getElementById(id);
+}
+
+function showLoading() {
+    $("loadingOverlay").classList.remove("hidden");
+}
+
+function hideLoading() {
+    $("loadingOverlay").classList.add("hidden");
 }
 
 function toNumber(value) {
@@ -479,7 +487,7 @@ function renderCarLoan() {
     const startDate = parseDateOnly(state.carLoan.startDate);
     const selectedMonth = referenceMonthDate(0);
     let currentInst = ((selectedMonth.getFullYear() - startDate.getFullYear()) * 12) + (selectedMonth.getMonth() - startDate.getMonth()) + 1;
-    if (currentInst < 0) {
+    if (currentInst < 1) {
         currentInst = 0;
     }
     if (currentInst > state.carLoan.totalMonths) {
@@ -724,6 +732,7 @@ async function refreshAppData() {
         loadImportOverview(),
     ]);
     showAppShell();
+    hideLoading();
 }
 
 async function updateCashFlowItem(type, id, field, value) {
@@ -842,7 +851,7 @@ async function saveCarLoanFromModal() {
         await loadCarLoan();
         closeCarModal();
     } catch (error) {
-        console.error(error);
+        console.error("saveCarLoanFromModal failed:", error);
         alert("Δεν μπόρεσα να αποθηκεύσω το δάνειο.");
     }
 }
@@ -864,6 +873,7 @@ function closeModal() {
         $("inpTitle").value = "";
         $("inpAmount").value = "";
         $("inpMonths").value = "";
+        $("inpDate").value = "";
     }, 200);
 }
 
@@ -935,7 +945,7 @@ async function saveInstallment() {
         closeModal();
         await loadInstallments();
     } catch (error) {
-        console.error(error);
+        console.error("saveInstallment failed:", error);
         alert("Δεν μπόρεσα να αποθηκεύσω τη δόση.");
     }
 }
@@ -994,15 +1004,18 @@ async function handleSession(session) {
 
     lastSessionUserId = nextUserId;
     state.currentUser = session.user;
+    showLoading();
 
     try {
         const allowed = await assertOwnerAccess();
         if (!allowed) {
+            hideLoading();
             return;
         }
         await refreshAppData();
     } catch (error) {
-        console.error(error);
+        console.error("handleSession/refreshAppData failed:", error);
+        hideLoading();
         showLoggedOut("Σφάλμα σύνδεσης με το Supabase.");
     }
 }
@@ -1049,8 +1062,13 @@ async function bootstrap() {
 
     updateMonthControls();
     setSummaryTitle();
-    const { data } = await supabase.auth.getSession();
-    await handleSession(data.session);
+    try {
+        const { data } = await supabase.auth.getSession();
+        await handleSession(data?.session ?? null);
+    } catch (error) {
+        console.error("bootstrap getSession failed:", error);
+        showLoggedOut("Σφάλμα σύνδεσης με το Supabase.");
+    }
 
     authSubscription = supabase.auth.onAuthStateChange((_event, session) => {
         void handleSession(session);
