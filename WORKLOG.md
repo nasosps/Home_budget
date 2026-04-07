@@ -67,3 +67,32 @@ Harden the app so budget data is private, prepare a safer import flow for bank f
 - Sign into the migrated app and verify the authenticated screens render the imported Supabase data as expected for multiple selected months.
 - Decide whether to pull extra historical data from Firebase or keep the screenshot-based manual snapshot as the authoritative starting point.
 - Prepare the repo for git push without raw PDFs, screenshots or local secrets.
+
+---
+
+## 2026-04-07
+
+### Goal
+Process two new bank PDFs and verify overall system health.
+
+### Completed
+- Identified 2 new bank files added to `bank_files/` on 2026-04-07:
+  - `14-3-2026 - 1004.pdf` (card 1004, March 14 statement)
+  - `15-3-2026 - 1001 .pdf` (card 1001, March 15 statement)
+- Confirmed via SHA256 that these are genuinely different PDF files from the existing `14-03-26 - 1004.pdf` and `15-03-26 - 1001.pdf` (re-downloads from the bank portal, same financial data).
+- Installed Tesseract OCR (v5.4.0 via winget UB-Mannheim) which was missing from this environment — required for card account summary PDF parsing.
+- Ran the full parse pipeline (`scripts/import_alpha_pdfs.py`) across all 11 PDFs successfully.
+- Verified new files contain identical financial data to existing March files:
+  - 1004: new_balance `210.11`, payment_due `2026-04-07`, credit_limit `1500.00`
+  - 1001: new_balance `234.41`, payment_due `2026-04-07`, credit_limit `1500.00`
+- Synced all 11 parsed files to Supabase (`sync_to_supabase.py`) — 11 applied, 0 failed.
+
+### Current State
+- Supabase now has 13 import files (11 from PDFs + 1 manual snapshot + original runs).
+- Card 1001 (Energy Mastercard): current balance `234.41`, due `2026-04-07`
+- Card 1004 (Alpha Bank MasterCard): current balance `210.11`, due `2026-04-07`
+- 45 card transactions + 30 bank transactions remain in place.
+
+### Notes
+- The two new PDFs are re-downloads of the same March statements. The different SHA256 is typical for bank-generated PDFs (embedded timestamps differ per download session).
+- Tesseract must be available in PATH for the parser to handle card account summary PDFs. Add `C:\Program Files\Tesseract-OCR` to system PATH if running on a fresh machine.
