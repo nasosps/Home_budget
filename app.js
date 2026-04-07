@@ -329,7 +329,7 @@ function createActionButton(iconClass, colorClass, onClick) {
 
 function buildInstallmentView(plan) {
     const startDate = parseDateOnly(plan.start_date);
-    const selectedMonth = referenceMonthDate(0);
+    const selectedMonth = referenceMonthDate(-1);
     let currentInst = ((selectedMonth.getFullYear() - startDate.getFullYear()) * 12) + (selectedMonth.getMonth() - startDate.getMonth()) + 1;
     if (currentInst < 1) {
         currentInst = 0;
