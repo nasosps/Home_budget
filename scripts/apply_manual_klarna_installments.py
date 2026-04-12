@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 """
-Apply the 2026-04-12 manual Klarna installment additions into Supabase.
+Apply the 2026-04-12 manual Klarna installment set into Supabase.
 
-This is intentionally idempotent so the same four rows can be inserted on a
-clean environment or normalized if they were entered manually before.
+This is intentionally idempotent so the same four valid rows can be inserted on
+a clean environment, normalized if they were entered manually before, and used
+to cancel stale active Klarna rows that should no longer appear.
 """
 
 from __future__ import annotations
@@ -91,6 +92,22 @@ def same_money(left: Any, right: Any) -> bool:
     return abs(float(left) - float(right)) < 0.005
 
 
+def target_title_aliases() -> set[str]:
+    aliases = set()
+    for plan in TARGET_PLANS:
+        aliases.add(plan["title"])
+        aliases.update(plan["title_aliases"])
+    return aliases
+
+
+def target_note_aliases() -> set[str]:
+    aliases = set()
+    for plan in TARGET_PLANS:
+        aliases.add(plan["notes"])
+        aliases.update(plan["note_aliases"])
+    return aliases
+
+
 def is_matching_row(row: dict[str, Any], plan: dict[str, Any]) -> bool:
     if row.get("title") == plan["title"]:
         return True
@@ -126,7 +143,24 @@ def normalized_payload(user_id: str, alpha_card_id: str, plan: dict[str, Any]) -
     }
 
 
-def apply_plans(client: SupabaseRestClient, user_id: str, alpha_card_id: str) -> tuple[list[str], list[str]]:
+def looks_like_klarna_row(row: dict[str, Any]) -> bool:
+    title = str(row.get("title") or "").lower()
+    notes = str(row.get("notes") or "").lower()
+    if "klarna" in title or "klarna" in notes:
+        return True
+    return row.get("title") in target_title_aliases() or row.get("notes") in target_note_aliases()
+
+
+def cancel_row(client: SupabaseRestClient, user_id: str, row_id: str) -> None:
+    client.update(
+        "installment_plans",
+        {"id": eq(row_id), "user_id": eq(user_id)},
+        {"status": "cancelled"},
+        returning=False,
+    )
+
+
+def apply_plans(client: SupabaseRestClient, user_id: str, alpha_card_id: str) -> tuple[list[str], list[str], list[str]]:
     rows = client.select(
         "installment_plans",
         {"user_id": eq(user_id), "status": eq("active")},
@@ -135,36 +169,52 @@ def apply_plans(client: SupabaseRestClient, user_id: str, alpha_card_id: str) ->
 
     inserted: list[str] = []
     updated: list[str] = []
+    cancelled: list[str] = []
+    preserved_ids: set[str] = set()
 
     for plan in TARGET_PLANS:
         payload = normalized_payload(user_id, alpha_card_id, plan)
         matching_rows = [row for row in rows if is_matching_row(row, plan)]
 
         if matching_rows:
-            for row in matching_rows:
-                client.update(
-                    "installment_plans",
-                    {"id": eq(row["id"]), "user_id": eq(user_id)},
-                    {
-                        "card_account_id": alpha_card_id,
-                        "title": plan["title"],
-                        "total_amount": plan["total_amount"],
-                        "total_months": plan["total_months"],
-                        "monthly_payment": plan["monthly_payment"],
-                        "start_date": plan["start_date"],
-                        "status": "active",
-                        "notes": plan["notes"],
-                    },
-                    returning=False,
-                )
+            keeper = matching_rows[0]
+            client.update(
+                "installment_plans",
+                {"id": eq(keeper["id"]), "user_id": eq(user_id)},
+                {
+                    "card_account_id": alpha_card_id,
+                    "title": plan["title"],
+                    "total_amount": plan["total_amount"],
+                    "total_months": plan["total_months"],
+                    "monthly_payment": plan["monthly_payment"],
+                    "start_date": plan["start_date"],
+                    "status": "active",
+                    "notes": plan["notes"],
+                },
+                returning=False,
+            )
+            preserved_ids.add(keeper["id"])
+            for duplicate in matching_rows[1:]:
+                cancel_row(client, user_id, duplicate["id"])
+                cancelled.append(duplicate["title"])
             updated.append(plan["title"])
             continue
 
         client.insert("installment_plans", payload, returning=False)
         inserted.append(plan["title"])
-        rows.append(payload)
+        rows.append({**payload, "id": f"inserted:{plan['title']}"})
 
-    return inserted, updated
+    for row in rows:
+        row_id = row.get("id")
+        if not row_id or str(row_id).startswith("inserted:"):
+            continue
+        if row_id in preserved_ids:
+            continue
+        if looks_like_klarna_row(row):
+            cancel_row(client, user_id, row_id)
+            cancelled.append(row["title"])
+
+    return inserted, updated, cancelled
 
 
 def main() -> int:
@@ -181,7 +231,7 @@ def main() -> int:
     card_map = ensure_legacy_card_accounts(client, user_id)
     alpha_card_id = card_map["alpha"]
 
-    inserted, updated = apply_plans(client, user_id, alpha_card_id)
+    inserted, updated, cancelled = apply_plans(client, user_id, alpha_card_id)
 
     append_local_log(
         Path(args.log_path),
@@ -191,6 +241,7 @@ def main() -> int:
             "owner_email": owner_email,
             "inserted": inserted,
             "updated": updated,
+            "cancelled": cancelled,
             "plan_count": len(TARGET_PLANS),
         },
     )
@@ -198,6 +249,7 @@ def main() -> int:
     print(f"Applied {len(TARGET_PLANS)} manual Klarna plans for {owner_email}.")
     print(f"Inserted: {len(inserted)}")
     print(f"Updated: {len(updated)}")
+    print(f"Cancelled: {len(cancelled)}")
     return 0
 
 

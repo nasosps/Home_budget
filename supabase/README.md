@@ -117,7 +117,7 @@ If you want to reapply the four manual Klarna installments captured on 2026-04-1
 python scripts/apply_manual_klarna_installments.py
 ```
 
-The script is idempotent: it updates the matching Supabase rows when they already exist and inserts them only when missing.
+The script is idempotent: it keeps the four valid `VISA 2008` Klarna plans active, updates matching rows when they already exist, inserts them only when missing, and cancels other stale active Klarna rows.
 
 ## Why this split is safer
 

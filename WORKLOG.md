@@ -113,7 +113,8 @@ Capture the latest manual Klarna installments as a reproducible repo change inst
   - `TEMU.COM - Klarna (48€)`
 - Reused the existing legacy Alpha card mapping so the new plans land under the same card bucket as the other Klarna entries.
 - Kept a local JSONL audit trail under `.local/migrations/` when the script runs, without adding private budget state into git-tracked snapshots.
+- Tightened the script so it now keeps only the four valid `VISA 2008` Klarna plans active and cancels stale active Klarna rows inferred from older history.
 
 ### Notes
-- The script is safe to rerun: it updates matching rows if they already exist and inserts them only when missing.
+- The script is safe to rerun: it updates matching rows if they already exist, inserts them only when missing, and cancels extra active Klarna rows that are no longer valid.
 - The target monthly total remains `65.66` for both May 2026 and June 2026.
