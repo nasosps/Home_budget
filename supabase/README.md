@@ -109,6 +109,16 @@ python scripts/import_manual_snapshot.py --input .local/manual_snapshot.json
 
 This is useful for one-off reconstruction from screenshots or exported notes without committing private values into git.
 
+## Manual Klarna installment patch
+
+If you want to reapply the four manual Klarna installments captured on 2026-04-12:
+
+```powershell
+python scripts/apply_manual_klarna_installments.py
+```
+
+The script is idempotent: it updates the matching Supabase rows when they already exist and inserts them only when missing.
+
 ## Why this split is safer
 
 - The public website never needs direct access to raw bank PDFs.

@@ -96,3 +96,24 @@ Process two new bank PDFs and verify overall system health.
 ### Notes
 - The two new PDFs are re-downloads of the same March statements. The different SHA256 is typical for bank-generated PDFs (embedded timestamps differ per download session).
 - Tesseract must be available in PATH for the parser to handle card account summary PDFs. Add `C:\Program Files\Tesseract-OCR` to system PATH if running on a fresh machine.
+
+---
+
+## 2026-04-12
+
+### Goal
+Capture the latest manual Klarna installments as a reproducible repo change instead of a one-off live-only edit.
+
+### Completed
+- Added `scripts/apply_manual_klarna_installments.py` so the four manual Klarna plans from 2026-04-12 can be applied idempotently into Supabase.
+- Matched the repo-side script to the same live rows added for March-starting Klarna plans:
+  - `Skroutz - Klarna (60€)`
+  - `Skroutz - Klarna (52€)`
+  - `TEMU.COM - Klarna (37€)`
+  - `TEMU.COM - Klarna (48€)`
+- Reused the existing legacy Alpha card mapping so the new plans land under the same card bucket as the other Klarna entries.
+- Kept a local JSONL audit trail under `.local/migrations/` when the script runs, without adding private budget state into git-tracked snapshots.
+
+### Notes
+- The script is safe to rerun: it updates matching rows if they already exist and inserts them only when missing.
+- The target monthly total remains `65.66` for both May 2026 and June 2026.
