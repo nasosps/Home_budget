@@ -9,6 +9,7 @@ old_*.png
 logs/
 tmp/
 .playwright-cli/
+.claude/
 output/playwright/
 
 # Local secrets
@@ -17,6 +18,7 @@ output/playwright/
 !.env.example
 env
 secrets*
+p3d_app/api/config.local.php
 
 # Python cache
 __pycache__/
