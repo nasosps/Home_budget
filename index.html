@@ -5,7 +5,22 @@
     <meta http-equiv="refresh" content="0; url=https://p3d.gr/Home_budget/">
     <meta name="robots" content="noindex">
     <link rel="canonical" href="https://p3d.gr/Home_budget/">
-    <script>window.location.replace("https://p3d.gr/Home_budget/");</script>
+    <script>
+      (function () {
+        const target = "https://p3d.gr/Home_budget/";
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker
+            .getRegistrations()
+            .then((registrations) =>
+              Promise.all(registrations.map((registration) => registration.unregister()))
+            )
+            .catch(() => {})
+            .finally(() => window.location.replace(target));
+        } else {
+          window.location.replace(target);
+        }
+      })();
+    </script>
     <title>Moved to p3d.gr</title>
   </head>
   <body>
