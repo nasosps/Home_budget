@@ -1,473 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="el">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Οικονομικά Σπιτιού</title>
-
-    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#10b981">
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed: ', err));
-            });
-        }
-    </script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { 'alpha-energy': '#ea580c', 'alpha-mc': '#881337', 'pancreta': '#2563eb' }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f8fafc;
-        }
-
-        .mobile-container {
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background-color: white;
-            position: relative;
-            padding-bottom: 90px;
-        }
-
-        .fab-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background-color: #0f172a;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            font-size: 24px;
-            z-index: 50;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .fab-btn:active {
-            transform: scale(0.95);
-        }
-
-        .modal {
-            transition: opacity 0.2s ease;
-        }
-
-        .modal-content {
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .nav-btn {
-            flex: 1;
-            text-align: center;
-            padding: 12px 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #64748b;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .nav-btn.active {
-            color: #0f172a;
-            border-bottom-color: #0f172a;
-        }
-
-        .nav-icon {
-            display: block;
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Απλός προσωπικός και οικογενειακός οικονομικός προγραμματισμός.">
+    <title>P3D Finance</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./favicon.ico">
+    <link rel="stylesheet" href="./finance.css?v=20260907">
 </head>
-
 <body>
+    <div id="loading" class="loading" aria-live="polite"><span></span><p>Φόρτωση οικονομικών…</p></div>
 
-    <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center">
-        <div class="flex flex-col items-center gap-3">
-            <div class="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-sm font-semibold text-slate-600">Φόρτωση...</p>
-        </div>
+    <section id="loginView" class="login-view hidden">
+        <form id="loginForm" class="login-card">
+            <div class="brand-mark">P3D</div>
+            <p class="eyebrow">Προσωπικός προϋπολογισμός</p>
+            <h1>P3D Finance</h1>
+            <p class="muted">Μια καθαρή εικόνα για όσα μπαίνουν, όσα φεύγουν και όσα μένουν.</p>
+            <label>Email<input id="emailInput" type="email" autocomplete="username" required></label>
+            <label>Κωδικός<input id="passwordInput" type="password" autocomplete="current-password" required></label>
+            <button class="primary wide" type="submit">Σύνδεση</button>
+            <p id="loginError" class="form-error" role="alert"></p>
+        </form>
+    </section>
+
+    <div id="app" class="app hidden">
+        <header class="topbar">
+            <div><p class="eyebrow light">Προσωπικά οικονομικά</p><h1>P3D Finance</h1></div>
+            <button id="logoutBtn" class="icon-button dark" type="button" aria-label="Αποσύνδεση">↗</button>
+        </header>
+        <section class="month-bar">
+            <button id="previousMonth" class="icon-button" type="button" aria-label="Προηγούμενος μήνας">‹</button>
+            <label><span>Μήνας</span><input id="monthPicker" type="month"></label>
+            <button id="nextMonth" class="icon-button" type="button" aria-label="Επόμενος μήνας">›</button>
+        </section>
+
+        <main>
+            <section id="view-home" class="view active">
+                <div class="hero-card"><div><p id="heroMonth" class="eyebrow light">—</p><p class="hero-label">Ασφαλές για χρήση</p><strong id="safeToSpend" class="hero-amount">—</strong><p id="safePerDay" class="hero-note">—</p></div><div class="hero-orb" aria-hidden="true"></div></div>
+                <div class="metric-grid">
+                    <article class="metric"><span>Μισθός</span><strong id="baseIncome">—</strong></article>
+                    <article class="metric positive"><span>Extra</span><strong id="extraIncome">—</strong><small>3D & άλλα</small></article>
+                    <article class="metric obligation"><span>Δικές μου υποχρεώσεις</span><strong id="ownObligations">—</strong></article>
+                    <article class="metric"><span>Μένουν από μισθό</span><strong id="salaryRemaining">—</strong></article>
+                    <article class="metric saving"><span>Προγραμματισμένη αποταμίευση</span><strong id="plannedSavings">—</strong></article>
+                    <article class="metric"><span>Πραγματικά αποταμιεύτηκαν</span><strong id="actualSavings">—</strong></article>
+                </div>
+                <article id="reviewNotice" class="notice warning hidden"><div><strong>Χρειάζεται μία μικρή συμπλήρωση</strong><p id="reviewNoticeText"></p></div><button class="secondary" data-action="open-payer-wizard">Συμπλήρωση</button></article>
+                <section class="section-card">
+                    <div class="section-heading"><div><p class="eyebrow">Κάρτες</p><h2>Τι περνάει από τις κάρτες μου</h2></div><strong id="cardsTotal">—</strong></div>
+                    <div class="split-list"><div><span>Δικά μου</span><strong id="cardsMine">—</strong></div><div><span>Άλλων</span><strong id="cardsOthers">—</strong></div><div><span>Επιστροφές σε αναμονή</span><strong id="refundsPending">—</strong></div><div><span>Χωρίς ανάθεση</span><strong id="cardsUnassigned">—</strong></div></div>
+                </section>
+                <section class="section-card"><div class="section-heading"><div><p class="eyebrow">Μπροστά</p><h2>Ελευθερώνονται σύντομα</h2></div></div><div id="upcomingList" class="timeline"></div></section>
+            </section>
+
+            <section id="view-month" class="view">
+                <div class="page-title"><div><p class="eyebrow">Αναλυτικά</p><h2 id="monthTitle">Μήνας</h2></div></div>
+                <section class="section-card"><div class="section-heading"><h3>Έσοδα</h3><strong id="monthIncomeTotal">—</strong></div><div id="incomeList" class="row-list"></div></section>
+                <section class="section-card"><div class="section-heading"><h3>Πάγια & έξοδα</h3><strong id="monthExpenseTotal">—</strong></div><div id="expenseList" class="row-list"></div></section>
+                <section class="section-card"><div class="section-heading"><h3>Συνδρομές</h3><strong id="subscriptionTotal">—</strong></div><p id="subscriptionAnnual" class="muted compact"></p><div id="subscriptionList" class="row-list"></div></section>
+                <section class="section-card"><div class="section-heading"><h3>Νέες καταχωρήσεις μήνα</h3></div><div id="monthEntriesList" class="row-list"></div></section>
+            </section>
+
+            <section id="view-installments" class="view">
+                <div class="page-title"><div><p class="eyebrow">Υποχρεώσεις</p><h2>Δόσεις</h2></div><strong id="installmentGrandTotal">—</strong></div>
+                <div id="cardBreakdown" class="mini-grid"></div><section id="carCard" class="car-card"></section>
+                <section class="section-card"><div class="section-heading"><h3>Ενεργές αυτόν τον μήνα</h3></div><div id="installmentList" class="installment-list"></div></section>
+            </section>
+
+            <section id="view-savings" class="view">
+                <div class="page-title"><div><p class="eyebrow">Στόχοι</p><h2>Αποταμίευση</h2></div></div><div id="savingsGoals" class="goal-list"></div>
+                <section class="section-card accent-soft"><p class="eyebrow">3D εκτυπώσεις</p><h3>100% του καθαρού κέρδους προστατεύεται</h3><div class="scenario-options"><button data-print-profit="80"><span>Χαμηλά</span><strong>80 €</strong></button><button data-print-profit="120" class="selected"><span>Τυπικά</span><strong>120 €</strong></button><button data-print-profit="160"><span>Καλά</span><strong>160 €</strong></button></div><p class="muted compact">Η επιλογή προσθέτει νέα χειροκίνητη εγγραφή στον επιλεγμένο μήνα.</p></section>
+            </section>
+
+            <section id="view-more" class="view">
+                <div class="page-title"><div><p class="eyebrow">Εργαλεία</p><h2>Περισσότερα</h2></div></div>
+                <section class="section-card"><div class="section-heading"><div><p class="eyebrow">Πρόβλεψη</p><h3>Επόμενοι μήνες</h3></div><select id="forecastRange"><option value="3">3 μήνες</option><option value="6">6 μήνες</option><option value="12" selected>12 μήνες</option><option value="24">24 μήνες</option><option value="60">5 χρόνια</option></select></div><div id="forecastList" class="forecast-list"></div></section>
+                <section class="section-card"><p class="eyebrow">Simulator</p><h3>Μπορώ να το αγοράσω;</h3><form id="purchaseForm" class="inline-form"><label>Ποσό (€)<input id="purchaseAmount" type="number" min="0" step="0.01" value="180"></label><button class="secondary" type="submit">Υπολογισμός</button></form><div id="purchaseResult" class="purchase-result"></div></section>
+                <section class="section-card"><div class="section-heading"><div><p class="eyebrow">Σενάρια</p><h3>Μελλοντικό σπίτι</h3></div><label class="switch"><input id="housingToggle" type="checkbox"><span></span></label></div><p id="housingDescription" class="muted"></p><label>Ενεργοποίηση από μήνα<input id="housingStart" type="month"></label><button id="previewHousing" class="secondary wide" type="button">Δείξε μου αν ίσχυε σήμερα</button></section>
+                <section class="section-card"><p class="eyebrow">Ρυθμίσεις</p><h3>Κανόνας 3D Printing</h3><form id="settingsForm" class="inline-form"><label>Ποσοστό αποταμίευσης<input id="savingRate" type="number" min="0" max="100" step="1"></label><button class="secondary" type="submit">Αποθήκευση</button></form></section>
+            </section>
+        </main>
+
+        <button id="quickAddBtn" class="fab" type="button" aria-label="Νέα καταχώρηση">+</button>
+        <nav class="bottom-nav" aria-label="Κύρια πλοήγηση"><button data-view="home" class="active"><span>⌂</span>Αρχική</button><button data-view="month"><span>▤</span>Μήνας</button><button data-view="installments"><span>◫</span>Δόσεις</button><button data-view="savings"><span>◇</span>Αποταμίευση</button><button data-view="more"><span>•••</span>Περισσότερα</button></nav>
     </div>
 
-    <div class="mobile-container flex flex-col">
+    <div id="quickSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="quickTitle"><button class="sheet-backdrop" data-action="close-sheet" aria-label="Κλείσιμο"></button><div class="sheet-panel"><div class="sheet-handle"></div><div class="section-heading"><h2 id="quickTitle">Νέα καταχώρηση</h2><button class="icon-button" data-action="close-sheet">×</button></div><div class="quick-grid"><button data-add="extra_income"><span>＋</span>Νέο έσοδο</button><button data-add="expense"><span>−</span>Νέο έξοδο</button><button data-add="installment"><span>◫</span>Νέα δόση</button><button data-add="subscription"><span>↻</span>Νέα συνδρομή</button><button data-add="actual_saving"><span>◇</span>Νέα αποταμίευση</button><button data-add="reimbursement"><span>↩</span>Επιστροφή χρημάτων</button><button data-add="recurring"><span>≋</span>Νέο πάγιο</button></div></div></div>
 
-        <div class="bg-white sticky top-0 z-20 shadow-sm">
-            <div class="flex justify-between items-center p-4 bg-slate-900 text-white rounded-b-2xl">
-                <h1 class="text-lg font-bold tracking-tight"><i class="fas fa-wallet mr-2 text-blue-400"></i> Οικονομικά
-                </h1>
-                <div class="flex gap-2">
-                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">v10.0</span>
-                    <button id="logoutBtn"
-                        class="hidden text-xs bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-600">Έξοδος</button>
-                </div>
-            </div>
+    <div id="entryModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="entryTitle"><div class="modal-panel"><div class="section-heading"><h2 id="entryTitle">Νέα καταχώρηση</h2><button class="icon-button" data-action="close-entry">×</button></div><form id="entryForm" class="form-grid"><input id="entryType" type="hidden"><input id="entryRecurringId" type="hidden"><label class="full">Τίτλος<input id="entryName" required maxlength="255"></label><label>Ποσό (€)<input id="entryAmount" type="number" min="0" step="0.01" required></label><label>Μήνας<input id="entryMonth" type="month" required></label><label id="totalInstallmentsField" class="hidden">Συνολικές δόσεις<input id="entryTotalInstallments" type="number" min="1" step="1"></label><label id="cardField" class="hidden">Κάρτα<select id="entryCard"><option>Energy</option><option>Alpha</option><option>Pancreta</option><option>Χωρίς κάρτα</option></select></label><label id="categoryField">Κατηγορία<input id="entryCategory" value="Άλλο"></label><label id="payerField">Πληρωτής<select id="entryPayer"><option>Νάσος</option><option>Μητέρα</option><option>Νίκος</option><option>Κοινό</option><option>Άλλος</option><option value="unassigned">Χωρίς ανάθεση</option></select></label><label id="amountTypeField" class="hidden">Τύπος ποσού<select id="entryAmountType"><option value="fixed">Σταθερό</option><option value="variable">Μεταβλητό</option></select></label><label class="full">Σημειώσεις<textarea id="entryNotes" rows="2"></textarea></label><button class="primary wide full" type="submit">Αποθήκευση</button></form></div></div>
 
-            <div id="navTabs" class="flex border-b border-gray-100 hidden">
-                <div onclick="switchTab('cards')" class="nav-btn active" id="tabBtn-cards">
-                    <i class="nav-icon fas fa-credit-card"></i> Κάρτες
-                </div>
-                <div onclick="switchTab('cashflow')" class="nav-btn" id="tabBtn-cashflow">
-                    <i class="nav-icon fas fa-coins"></i> Ταμείο
-                </div>
-                <div onclick="switchTab('summary')" class="nav-btn" id="tabBtn-summary">
-                    <i class="nav-icon fas fa-chart-pie"></i> Σύνοψη
-                </div>
-            </div>
-
-            <div id="monthControls" class="hidden px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-                <div class="flex items-center gap-2">
-                    <button id="monthPrevBtn" type="button"
-                        class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 flex items-center justify-center">
-                        <i class="fas fa-chevron-left text-xs"></i>
-                    </button>
-                    <div class="flex-1">
-                        <label for="monthPicker" class="block text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1">Μήνας προβολής</label>
-                        <div class="flex items-center gap-2">
-                            <input id="monthPicker" type="month"
-                                class="flex-1 min-w-0 p-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 outline-none">
-                            <button id="monthTodayBtn" type="button"
-                                class="px-3 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold whitespace-nowrap">Σήμερα</button>
-                        </div>
-                    </div>
-                    <button id="monthNextBtn" type="button"
-                        class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 flex items-center justify-center">
-                        <i class="fas fa-chevron-right text-xs"></i>
-                    </button>
-                </div>
-                <p id="monthDisplayLabel" class="mt-2 text-xs text-slate-500 font-medium">--</p>
-            </div>
-        </div>
-
-        <div id="mainContent" class="flex-grow p-4 space-y-6 relative">
-
-            <div id="loginView" class="flex flex-col justify-center items-center h-[60vh]">
-                <div class="w-full bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
-                    <h2 class="text-2xl font-bold mb-8 text-slate-800 text-center">Καλωσήρθες</h2>
-                    <input type="email" id="emailInput" placeholder="Email"
-                        class="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-gray-50 outline-none">
-                    <input type="password" id="passInput" placeholder="Κωδικός"
-                        class="w-full p-4 border border-gray-200 rounded-xl mb-6 bg-gray-50 outline-none">
-                    <button onclick="handleLogin()"
-                        class="w-full bg-slate-900 text-white p-4 rounded-xl font-bold shadow-lg">Σύνδεση</button>
-                    <p id="loginMsg" class="text-red-500 text-sm text-center mt-4"></p>
-                </div>
-            </div>
-
-            <div id="tab-cards" class="tab-content hidden space-y-6">
-
-                <div class="flex flex-col space-y-3">
-                    <!-- Car Loan Widget -->
-                    <div id="carLoanWidget"
-                        class="bg-slate-800 text-white p-5 rounded-3xl shadow-xl border border-slate-700 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-1 bg-slate-700">
-                            <div id="carProgress" class="h-full bg-emerald-500 transition-all duration-1000"
-                                style="width: 0%"></div>
-                        </div>
-                        <div class="flex justify-between items-start mb-4 mt-2">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-slate-700 p-2 rounded-xl text-emerald-400"><i class="fas fa-car"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-lg leading-tight">Αυτοκίνητο</h3>
-                                    <p class="text-[10px] text-slate-400 font-mono" id="carEnds">--</p>
-                                </div>
-                            </div>
-                            <button onclick="openCarModal()"
-                                class="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition"><i
-                                    class="fas fa-cog text-xs text-slate-300"></i></button>
-                        </div>
-
-                        <div class="mb-2 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Συνολικο
-                                Κοστος</span>
-                            <div class="text-white font-bold text-sm tracking-wide" id="carTotalCost">--€</div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="bg-slate-700/50 p-3 rounded-2xl">
-                                <p class="text-[10px] text-slate-400 uppercase font-bold">Δοση</p>
-                                <p class="text-xl font-bold" id="carDoseis">--</p>
-                            </div>
-                            <div class="bg-slate-700/50 p-3 rounded-2xl">
-                                <p class="text-[10px] text-slate-400 uppercase font-bold">Εμειναν</p>
-                                <p class="text-xl font-bold text-emerald-400" id="carInstLeft">--</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs border-b border-slate-700 pb-2">
-                                <span class="text-slate-400">Πληρώθηκαν</span>
-                                <span class="font-bold text-slate-200" id="carPaid">--€</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-slate-300 font-bold">Υπόλοιπο</span>
-                                <span class="font-bold text-emerald-400 text-lg" id="carRemaining">--€</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-bolt"></i></div><span
-                                class="font-bold">ENERGY</span>
-                        </div>
-                        <div class="text-right">
-                            <span id="sumEnergyLabel" class="text-xs opacity-70 block uppercase">Τωρα</span>
-                            <span class="text-2xl font-bold">€ <span id="sumEnergy">0</span></span>
-                            <p class="text-[10px] opacity-80 mt-1 font-mono"><span id="nextSumEnergyLabel">Επόμ</span>: <span id="nextSumEnergy">0</span>€
-                            </p>
-                        </div>
-                    </div>
-                    <div
-                        class="bg-gradient-to-r from-red-800 to-rose-900 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-credit-card"></i></div><span
-                                class="font-bold">ALPHA</span>
-                        </div>
-                        <div class="text-right">
-                            <span id="sumAlphaLabel" class="text-xs opacity-70 block uppercase">Τωρα</span>
-                            <span class="text-2xl font-bold">€ <span id="sumAlpha">0</span></span>
-                            <p class="text-[10px] opacity-80 mt-1 font-mono"><span id="nextSumAlphaLabel">Επόμ</span>: <span id="nextSumAlpha">0</span>€</p>
-                        </div>
-                    </div>
-                    <div
-                        class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-white/20 p-2 rounded-lg"><i class="fas fa-university"></i></div><span
-                                class="font-bold">ΠΑΓΚΡΗΤΙΑ</span>
-                        </div>
-                        <div class="text-right">
-                            <span id="sumPancretaLabel" class="text-xs opacity-70 block uppercase">Τωρα</span>
-                            <span class="text-2xl font-bold">€ <span id="sumPancreta">0</span></span>
-                            <p class="text-[10px] opacity-80 mt-1 font-mono"><span id="nextSumPancretaLabel">Επόμ</span>: <span id="nextSumPancreta">0</span>€
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Λιστα (Ληξη συντομα)</h3>
-                    <div id="importOverviewCard" class="hidden mb-3 bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">PDF Sync</p>
-                                <p id="importOverviewPrimary" class="text-sm font-bold text-slate-800 mt-1">--</p>
-                                <p id="importOverviewSecondary" class="text-xs text-slate-500 mt-1">--</p>
-                            </div>
-                            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500">
-                                <i class="fas fa-file-import"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="installmentsList" class="space-y-3 pb-20"></div>
-                </div>
-            </div>
-
-            <div id="tab-cashflow" class="tab-content hidden space-y-6">
-                <div class="bg-green-50 p-5 rounded-3xl border border-green-100 relative">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-green-800 font-bold flex items-center"><i class="fas fa-arrow-down mr-2"></i>
-                            Έσοδα</h3>
-                        <button onclick="addCashFlowItem('income')"
-                            class="w-8 h-8 bg-white rounded-full text-green-600 shadow-sm flex items-center justify-center hover:bg-green-100 transition"><i
-                                class="fas fa-plus text-xs"></i></button>
-                    </div>
-                    <div id="incomeList" class="space-y-2"></div>
-                    <div class="mt-4 pt-3 border-t border-green-200 flex justify-between items-center">
-                        <span class="text-xs font-bold text-green-900 uppercase">Συνολο</span>
-                        <span class="text-xl font-bold text-green-700" id="totalIncomeDisplay">0€</span>
-                    </div>
-                </div>
-
-                <div class="bg-red-50 p-5 rounded-3xl border border-red-100 relative">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-red-800 font-bold flex items-center"><i class="fas fa-arrow-up mr-2"></i> Πάγια
-                            Έξοδα</h3>
-                        <button onclick="addCashFlowItem('expenses')"
-                            class="w-8 h-8 bg-white rounded-full text-red-600 shadow-sm flex items-center justify-center hover:bg-red-100 transition"><i
-                                class="fas fa-plus text-xs"></i></button>
-                    </div>
-                    <div id="expensesList" class="space-y-2"></div>
-                    <div class="mt-4 pt-3 border-t border-red-200 flex justify-between items-center">
-                        <span class="text-xs font-bold text-red-900 uppercase">Συνολο</span>
-                        <span class="text-xl font-bold text-red-700" id="totalFixedDisplay">0€</span>
-                    </div>
-                    <p class="text-[10px] text-red-400 mt-2 text-center">* Εδώ βάζεις μόνο τα έξοδα μετρητών (όχι
-                        κάρτες).</p>
-                </div>
-            </div>
-
-            <div id="tab-summary" class="tab-content hidden space-y-6 text-center pt-4">
-                <h2 id="summaryTitle" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Τελικό Διαθέσιμο
-                </h2>
-                <div class="relative inline-block">
-                    <span class="text-6xl font-black text-slate-800 tracking-tighter" id="grandTotalSummary">--</span>
-                    <span class="text-2xl text-slate-400 absolute -top-2 -right-6">€</span>
-                </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-4 text-left">
-                    <div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-600">🟢
-                            Έσοδα</span><span class="font-bold text-slate-800" id="sumInc">0€</span></div>
-                    <div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-600">🔴
-                            Πάγια (Μετρητά)</span><span class="font-bold text-red-500">- <span
-                                id="sumFix">0</span>€</span></div>
-                    <div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-600">🟠
-                            Δόσεις Καρτών</span><span class="font-bold text-orange-500">- <span
-                                id="sumCards">0</span>€</span></div>
-                    <div class="border-t border-slate-100 pt-3 mt-2">
-                        <p class="text-xs text-slate-400 text-center">Το ποσό αυτό είναι για καφέδες, βόλτες και
-                            αποταμίευση.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="fabBtn" class="fab-btn hidden" onclick="openModal()"><i class="fas fa-plus"></i></div>
-
-        <div id="addModal"
-            class="modal fixed inset-0 bg-black/60 z-50 hidden flex items-end justify-center backdrop-blur-sm"
-            onclick="if(event.target === this) closeModal()">
-            <div
-                class="modal-content bg-white w-full max-w-md rounded-t-[2rem] p-8 shadow-2xl h-[85vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-slate-800" id="modalTitle">Νέα Δόση</h3>
-                    <button onclick="closeModal()"
-                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i
-                            class="fas fa-times"></i></button>
-                </div>
-                <input type="hidden" id="editId">
-                <div class="space-y-6">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Καρτα</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <label class="cursor-pointer relative"><input type="radio" name="bankType" value="energy"
-                                    class="peer hidden" checked>
-                                <div
-                                    class="border-2 border-slate-100 rounded-2xl p-3 text-center peer-checked:bg-orange-500 peer-checked:text-white transition">
-                                    <i class="fas fa-bolt block mb-1 text-lg"></i> <span
-                                        class="text-xs font-bold">Energy</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer relative"><input type="radio" name="bankType" value="alpha"
-                                    class="peer hidden">
-                                <div
-                                    class="border-2 border-slate-100 rounded-2xl p-3 text-center peer-checked:bg-red-900 peer-checked:text-white transition">
-                                    <i class="fab fa-cc-mastercard block mb-1 text-lg"></i> <span
-                                        class="text-xs font-bold">Alpha</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer relative"><input type="radio" name="bankType" value="pancreta"
-                                    class="peer hidden">
-                                <div
-                                    class="border-2 border-slate-100 rounded-2xl p-3 text-center peer-checked:bg-blue-600 peer-checked:text-white transition">
-                                    <i class="fas fa-university block mb-1 text-lg"></i> <span
-                                        class="text-xs font-bold">Παγκρ.</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase ml-1">Τιτλος</label><input type="text"
-                            id="inpTitle"
-                            class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 font-bold text-slate-700">
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="flex-1"><label class="text-xs font-bold text-slate-400 uppercase ml-1">Συνολο
-                                (€)</label><input type="number" id="inpAmount"
-                                class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 font-mono font-bold text-slate-700">
-                        </div>
-                        <div class="flex-1"><label
-                                class="text-xs font-bold text-slate-400 uppercase ml-1">Δοσεις</label><input
-                                type="number" id="inpMonths"
-                                class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 font-mono font-bold text-slate-700">
-                        </div>
-                    </div>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase ml-1">Ημερομηνια Εναρξης</label><input
-                            type="date" id="inpDate"
-                            class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 font-medium text-slate-700">
-                    </div>
-                    <button onclick="saveInstallment()" id="saveBtn"
-                        class="w-full bg-slate-900 text-white p-5 rounded-2xl font-bold mt-2 shadow-xl">Αποθήκευση</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="carModal"
-            class="modal fixed inset-0 bg-black/80 z-50 hidden flex items-end justify-center backdrop-blur-sm"
-            onclick="if(event.target === this) closeCarModal()">
-            <div
-                class="modal-content bg-slate-900 w-full max-w-md rounded-t-[2rem] p-8 shadow-2xl h-[auto] border-t border-slate-700">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-white"><i class="fas fa-car mr-2 text-emerald-500"></i> Ρυθμίσεις
-                        Δανείου</h3>
-                    <button onclick="closeCarModal()"
-                        class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white"><i
-                            class="fas fa-times"></i></button>
-                </div>
-
-                <div class="space-y-5">
-                    <div><label class="text-xs font-bold text-slate-500 uppercase ml-1">Ημερομηνια Εναρξης</label><input
-                            type="date" id="inpCarStart"
-                            class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-medium text-white outline-none focus:border-emerald-500">
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="flex-1"><label class="text-xs font-bold text-slate-500 uppercase ml-1">Συνολικες
-                                Δοσεις</label><input type="number" id="inpCarMonths"
-                                class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-mono font-bold text-white outline-none focus:border-emerald-500">
-                        </div>
-                        <div class="flex-1"><label class="text-xs font-bold text-slate-500 uppercase ml-1">Ποσο
-                                Δοσης</label><input type="number" id="inpCarAmount"
-                                class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-mono font-bold text-white outline-none focus:border-emerald-500">
-                        </div>
-                    </div>
-
-                    <div><label class="text-xs font-bold text-slate-500 uppercase ml-1">Προκαταβολή</label><input
-                            type="number" id="inpCarDown"
-                            class="w-full p-4 border border-slate-700 rounded-2xl bg-slate-800 font-mono font-bold text-white outline-none focus:border-emerald-500">
-                    </div>
-
-                    <button onclick="saveCarLoanFromModal()"
-                        class="w-full bg-emerald-600 text-white p-5 rounded-2xl font-bold mt-4 shadow-lg hover:bg-emerald-500 transition">Αποθήκευση</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="nael-credit"
-        style="margin:20px auto 12px;text-align:center;font-family:inherit;font-size:12px;line-height:1.5;font-weight:500;color:inherit;opacity:0.72;">
-        <span>created by NAEL -</span>
-        <a href="https://nasosps.github.io/page/" target="_blank" rel="noopener"
-            style="color:inherit;text-decoration:underline;text-underline-offset:3px;">Link</a>
-    </div>
-
-    <script type="module" src="./app.js"></script>
+    <div id="payerWizard" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="payerWizardTitle"><div class="modal-panel"><div class="section-heading"><div><p class="eyebrow">Migration</p><h2 id="payerWizardTitle">Ποιος πληρώνει αυτή τη δόση;</h2></div><button class="icon-button" data-action="close-payer-wizard">×</button></div><div id="payerWizardBody"></div></div></div>
+    <div id="toast" class="toast hidden" role="status"></div>
+    <script type="module" src="./finance-app.js?v=20260907"></script>
 </body>
-
 </html>

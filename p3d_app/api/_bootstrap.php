@@ -333,6 +333,55 @@ function app_table_definitions(): array
             'allow_insert' => false,
             'allow_update' => false,
         ],
+        'finance_recurring_items' => [
+            'owner_column' => 'user_id',
+            'columns' => ['id', 'user_id', 'legacy_cashflow_id', 'kind', 'title', 'amount', 'category', 'payer', 'recurrence', 'start_month', 'end_month', 'payment_method', 'amount_type', 'affects_my_budget', 'is_active', 'needs_review', 'source', 'notes', 'created_at', 'updated_at'],
+            'writable' => ['kind', 'title', 'amount', 'category', 'payer', 'recurrence', 'start_month', 'end_month', 'payment_method', 'amount_type', 'affects_my_budget', 'is_active', 'needs_review', 'source', 'notes'],
+            'allow_insert' => true,
+            'allow_update' => true,
+        ],
+        'finance_installments' => [
+            'owner_column' => 'user_id',
+            'columns' => ['id', 'user_id', 'legacy_installment_id', 'card_account_id', 'card_label', 'title', 'total_amount', 'total_installments', 'installment_amount', 'start_month', 'end_month', 'payer', 'charged_to', 'affects_my_budget', 'reimbursement_expected', 'reimbursement_amount', 'reimbursement_status', 'status', 'is_active', 'needs_review', 'notes', 'created_at', 'updated_at'],
+            'writable' => ['card_account_id', 'card_label', 'title', 'total_amount', 'total_installments', 'installment_amount', 'start_month', 'end_month', 'payer', 'charged_to', 'affects_my_budget', 'reimbursement_expected', 'reimbursement_amount', 'reimbursement_status', 'status', 'is_active', 'needs_review', 'notes'],
+            'allow_insert' => true,
+            'allow_update' => true,
+        ],
+        'finance_savings_goals' => [
+            'owner_column' => 'user_id',
+            'columns' => ['id', 'user_id', 'title', 'target_amount', 'current_balance', 'target_date', 'is_active', 'notes', 'created_at', 'updated_at'],
+            'writable' => ['title', 'target_amount', 'current_balance', 'target_date', 'is_active', 'notes'],
+            'allow_insert' => true,
+            'allow_update' => true,
+        ],
+        'finance_month_entries' => [
+            'owner_column' => 'user_id',
+            'columns' => ['id', 'user_id', 'month', 'entry_type', 'recurring_item_id', 'savings_goal_id', 'title', 'amount', 'category', 'payer', 'affects_my_budget', 'notes', 'created_at', 'updated_at'],
+            'writable' => ['month', 'entry_type', 'recurring_item_id', 'savings_goal_id', 'title', 'amount', 'category', 'payer', 'affects_my_budget', 'notes'],
+            'allow_insert' => true,
+            'allow_update' => true,
+        ],
+        'finance_scenarios' => [
+            'owner_column' => 'user_id',
+            'columns' => ['id', 'user_id', 'title', 'monthly_amount', 'start_month', 'end_month', 'is_active', 'notes', 'created_at', 'updated_at'],
+            'writable' => ['title', 'monthly_amount', 'start_month', 'end_month', 'is_active', 'notes'],
+            'allow_insert' => true,
+            'allow_update' => true,
+        ],
+        'finance_settings' => [
+            'owner_column' => 'user_id',
+            'columns' => ['user_id', 'printing_forecast_low', 'printing_forecast_typical', 'printing_forecast_good', 'printing_savings_rate', 'safe_spend_basis', 'created_at', 'updated_at'],
+            'writable' => ['printing_forecast_low', 'printing_forecast_typical', 'printing_forecast_good', 'printing_savings_rate', 'safe_spend_basis'],
+            'allow_insert' => false,
+            'allow_update' => true,
+        ],
+        'finance_migration_log' => [
+            'owner_column' => 'user_id',
+            'columns' => ['id', 'user_id', 'migration_key', 'summary', 'created_at'],
+            'writable' => [],
+            'allow_insert' => false,
+            'allow_update' => false,
+        ],
     ];
 }
 
